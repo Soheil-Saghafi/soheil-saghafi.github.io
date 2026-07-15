@@ -58,64 +58,74 @@
         <span class="ra-chevron" aria-hidden="true"></span>
       </summary>
       <div class="ra-body">
-        <div class="ra-project">
-          <p class="ra-project-title">Inferring Neuron Excitability Parameters with Conditional GANs</p>
-          <p>
-            A central theme of my work is building conductance-based biophysical
-            models of excitable cells and inferring their parameters from data.
-            In
-            <a href="publications.html">Inferring Parameters of Populations of Pyramidal Neuron Models in Alzheimer's Disease Mouse Models Using Generative Adversarial Networks</a>,
-            we used a Hodgkin-Huxley-style model of pyramidal neuron excitability and
-            a GAN-based inference scheme to recover ion-channel conductances that
-            reproduce experimentally observed firing patterns &mdash; including the
-            altered excitability seen in Alzheimer's disease mouse models.
-          </p>
-          <p>
-            The widget below walks through that six-step pipeline &mdash; from the
-            mechanistic model, through parameter fitting and sensitivity-based
-            dimensionality reduction, to building a synthetic training set and
-            training the conditional GAN that ultimately infers parameters from
-            real experimental recordings.
-          </p>
+        <details class="ra-project" open>
+          <summary class="ra-project-summary">
+            <span class="ra-project-title">Inferring Neuron Excitability Parameters with Conditional GANs</span>
+            <span class="ra-project-chevron" aria-hidden="true"></span>
+          </summary>
+          <div class="ra-project-body">
+            <p>
+              A central theme of my work is building conductance-based biophysical
+              models of excitable cells and inferring their parameters from data.
+              In
+              <a href="publications.html">Inferring Parameters of Populations of Pyramidal Neuron Models in Alzheimer's Disease Mouse Models Using Generative Adversarial Networks</a>,
+              we used a Hodgkin-Huxley-style model of pyramidal neuron excitability and
+              a GAN-based inference scheme to recover ion-channel conductances that
+              reproduce experimentally observed firing patterns &mdash; including the
+              altered excitability seen in Alzheimer's disease mouse models.
+            </p>
+            <p>
+              The widget below walks through that six-step pipeline &mdash; from the
+              mechanistic model, through parameter fitting and sensitivity-based
+              dimensionality reduction, to building a synthetic training set and
+              training the conditional GAN that ultimately infers parameters from
+              real experimental recordings.
+            </p>
 
-          <div class="pipeline-demo" id="pipeline-demo">
-            <div class="pipeline-steps" id="pipeline-steps"></div>
+            <div class="pipeline-demo" id="pipeline-demo">
+              <div class="pipeline-steps" id="pipeline-steps"></div>
 
-            <div class="pipeline-panel">
-              <p class="pipeline-step-title" id="pipeline-title"></p>
-              <p class="pipeline-step-desc" id="pipeline-desc"></p>
-              <div class="pipeline-equation" id="pipeline-equation" style="display:none;"></div>
-              <canvas id="pipeline-canvas" width="700" height="320"></canvas>
-            </div>
+              <div class="pipeline-panel">
+                <p class="pipeline-step-title" id="pipeline-title"></p>
+                <p class="pipeline-step-desc" id="pipeline-desc"></p>
+                <div class="pipeline-equation" id="pipeline-equation" style="display:none;"></div>
+                <canvas id="pipeline-canvas" width="700" height="320"></canvas>
+              </div>
 
-            <div class="pipeline-nav">
-              <button type="button" id="pipeline-prev">&larr; Previous</button>
-              <button type="button" id="pipeline-next">Next &rarr;</button>
+              <div class="pipeline-nav">
+                <button type="button" id="pipeline-prev">&larr; Previous</button>
+                <button type="button" id="pipeline-next">Next &rarr;</button>
+              </div>
             </div>
           </div>
-        </div>
+        </details>
 
-        <div class="ra-project">
-          <p class="ra-project-title">Dynamic Entrainment in the Hodgkin-Huxley Model</p>
-          <p>
-            In
-            <a href="https://pubs.aip.org/aip/cha/article-abstract/34/10/103124/3318400/Dynamic-entrainment-A-deep-learning-and-data?redirectedFrom=fulltext" target="_blank" rel="noopener">Dynamic Entrainment: A Deep Learning and Data-Driven Process Approach for Synchronization in the Hodgkin-Huxley Model</a>,
-            we studied how a neuron's spiking response to a repeated current
-            pulse depends continuously on a data-driven model parameter. The
-            figure below shows that dependence directly: as the parameter is
-            varied, a small subthreshold "echo" following the first spike
-            gradually grows until it crosses threshold and becomes a full
-            second spike &mdash; the system moving continuously from a
-            single-spike response to a fully entrained two-spike response to
-            the same repeated stimulus.
-          </p>
-          <div class="ra-figure">
-            <video controls loop muted playsinline poster="dynamic-entrainment-poster.png">
-              <source src="dynamic-entrainment-fig3e.mp4" type="video/mp4">
-            </video>
-            <p class="ra-figure-caption">Figure: simulated voltage response V(t) (black) to a repeated current pulse (red) as the fitted parameter varies &mdash; the second pulse's response grows from a subthreshold bump into a full spike.</p>
+        <details class="ra-project">
+          <summary class="ra-project-summary">
+            <span class="ra-project-title">Dynamic Entrainment in the Hodgkin-Huxley Model</span>
+            <span class="ra-project-chevron" aria-hidden="true"></span>
+          </summary>
+          <div class="ra-project-body">
+            <p>
+              In
+              <a href="https://pubs.aip.org/aip/cha/article-abstract/34/10/103124/3318400/Dynamic-entrainment-A-deep-learning-and-data?redirectedFrom=fulltext" target="_blank" rel="noopener">Dynamic Entrainment: A Deep Learning and Data-Driven Process Approach for Synchronization in the Hodgkin-Huxley Model</a>,
+              we studied how a neuron's spiking response to a repeated current
+              pulse depends continuously on a data-driven model parameter. The
+              figure below shows that dependence directly: as the parameter is
+              varied, a small subthreshold "echo" following the first spike
+              gradually grows until it crosses threshold and becomes a full
+              second spike &mdash; the system moving continuously from a
+              single-spike response to a fully entrained two-spike response to
+              the same repeated stimulus.
+            </p>
+            <div class="ra-figure">
+              <video controls loop muted playsinline poster="dynamic-entrainment-poster.png">
+                <source src="dynamic-entrainment-fig3e.mp4" type="video/mp4">
+              </video>
+              <p class="ra-figure-caption">Figure: simulated voltage response V(t) (black) to a repeated current pulse (red) as the fitted parameter varies &mdash; the second pulse's response grows from a subthreshold bump into a full spike.</p>
+            </div>
           </div>
-        </div>
+        </details>
       </div>
     </details>
 
@@ -127,10 +137,15 @@
         <span class="ra-chevron" aria-hidden="true"></span>
       </summary>
       <div class="ra-body">
-        <div class="ra-project">
-          <p class="ra-project-title">[Project Title]</p>
-          <p class="placeholder-note">Demo coming soon &mdash; let me know which paper or project you'd like featured here.</p>
-        </div>
+        <details class="ra-project">
+          <summary class="ra-project-summary">
+            <span class="ra-project-title">[Project Title]</span>
+            <span class="ra-project-chevron" aria-hidden="true"></span>
+          </summary>
+          <div class="ra-project-body">
+            <p class="placeholder-note">Demo coming soon &mdash; let me know which paper or project you'd like featured here.</p>
+          </div>
+        </details>
       </div>
     </details>
 
@@ -142,10 +157,15 @@
         <span class="ra-chevron" aria-hidden="true"></span>
       </summary>
       <div class="ra-body">
-        <div class="ra-project">
-          <p class="ra-project-title">[Project Title]</p>
-          <p class="placeholder-note">Demo coming soon &mdash; let me know which paper or project you'd like featured here.</p>
-        </div>
+        <details class="ra-project">
+          <summary class="ra-project-summary">
+            <span class="ra-project-title">[Project Title]</span>
+            <span class="ra-project-chevron" aria-hidden="true"></span>
+          </summary>
+          <div class="ra-project-body">
+            <p class="placeholder-note">Demo coming soon &mdash; let me know which paper or project you'd like featured here.</p>
+          </div>
+        </details>
       </div>
     </details>
   </section>
