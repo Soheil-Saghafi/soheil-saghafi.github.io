@@ -491,61 +491,82 @@
     label('Conditional GAN training loop', discX, discY-14, {color: INK, weight:'600', size: 12, font: "'Inter', sans-serif"});
   }
 
-  // Real Data feeds its features up into the Trained Generator, whose
-  // output flows left; the framed panel on the right shows the resulting
-  // ensemble of inferred parameter traces.
+  // Real Data feeds its features up into the Trained Generator (left);
+  // a divider separates the process from the results: two ticked panels
+  // showing the resulting ensembles of inferred parameter traces (right).
   function renderInference() {
     canvas.style.display = 'block';
     eqEl.style.display = 'none';
     clear();
 
-    const genX = 200, genY = 40, genW = 190, genH = 64;
-    const dataW = 170, dataH = 56;
+    // ---- left: process diagram ----
+    const genW = 175, genH = 62, genX = 95, genY = 46;
+    const dataW = 160, dataH = 52;
     const genCx = genX + genW/2;
-    const dataX = genCx - dataW/2, dataY = 230;
+    const dataX = genCx - dataW/2, dataY = 226;
 
     box(genX, genY, genW, genH, 'Trained\nGenerator', {weight:'700'});
+    label('(weights fixed)', genCx-18, genY+genH+16, {align:'right', color: MUTED, size: 9.5});
     box(dataX, dataY, dataW, dataH, 'Real Data', {weight:'700'});
 
     arrow(genCx, dataY, genCx, genY+genH, {color: ACCENT, width: 2.5});
-    label('F\u1D63', genCx+16, (dataY+genY+genH)/2 + 4, {color: INK, size: 13, weight:'600', font:"'Inter', sans-serif"});
+    label('F\u1D63', genCx+15, (dataY+genY+genH)/2 + 4, {color: INK, size: 12.5, weight:'600', font:"'Inter', sans-serif"});
 
-    const outArrowEndX = genX - 60;
-    arrow(genX, genY+genH*0.5, outArrowEndX, genY+genH*0.5, {color: ACCENT, width: 2.5});
-    label('P\u1D4D | F\u1D63', outArrowEndX-10, genY+genH*0.5+5, {align:'right', color: INK, size: 13, weight:'600', font:"'Inter', sans-serif"});
+    const outEndX = genX - 45;
+    arrow(genX, genY+genH*0.5, outEndX, genY+genH*0.5, {color: ACCENT, width: 2.5});
+    label('P\u1D4D | F\u1D63', outEndX-8, genY+genH*0.5+5, {align:'right', color: INK, size: 12.5, weight:'600', font:"'Inter', sans-serif"});
 
-    const x0 = 460, y0 = 40, w = 210, h = 220;
-    chartFrame(x0, y0, w, h, {rows: 3});
-    for (let e = 0; e < 14; e++) {
+    label('Inference at test time', genX-45, 22, {color: INK, weight:'600', size: 12, font: "'Inter', sans-serif"});
+
+    // ---- divider ----
+    const dividerX = 335;
+    ctx.strokeStyle = RULE;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(dividerX, 20); ctx.lineTo(dividerX, 300);
+    ctx.stroke();
+
+    // ---- right: two ticked ensemble panels ----
+    label('Inferred Parameter Ensembles', dividerX+26, 22, {color: INK, weight:'600', size: 12, font: "'Inter', sans-serif"});
+
+    const gap = 34;
+    const panelW = (W - (dividerX+26) - 20 - gap)/2, panelH = 170, py0 = 62;
+    const px1 = dividerX + 26;
+    const px2 = px1 + panelW + gap;
+
+    function ensemblePanel(x0, title, sampleFn) {
+      chartFrame(x0, py0, panelW, panelH, {rows: 4});
+      ['40','0','-40','-80','-120'].forEach((t,i) => {
+        label(t, x0-8, py0 + i*(panelH/4) + 3, {align:'right', size:9.5});
+      });
+      for (let e = 0; e < 16; e++) {
+        ctx.beginPath();
+        ctx.strokeStyle = 'rgba(60,78,54,0.30)';
+        ctx.lineWidth = 1.05;
+        for (let i = 0; i <= 70; i++) {
+          const t = i/70;
+          const v = sampleFn(t, e);
+          const x = x0 + t*panelW;
+          const yv = py0+panelH - v*(panelH-8) - 4;
+          if (i===0) ctx.moveTo(x,yv); else ctx.lineTo(x,yv);
+        }
+        ctx.stroke();
+      }
+      label(title, x0, py0-10, {color: INK, weight:'600', size: 11.5, font: "'Inter', sans-serif"});
+      label('time \u2192', x0+panelW, py0+panelH+18, {align:'right', size: 9.5});
+    }
+
+    ensemblePanel(px1, 'Action potential', (t) => {
       const jitter = (Math.random()-0.5)*0.15;
       const shift = (Math.random()-0.5)*0.08;
-      ctx.beginPath();
-      ctx.strokeStyle = 'rgba(60,78,54,0.28)';
-      ctx.lineWidth = 1.1;
-      for (let i = 0; i <= 70; i++) {
-        const t = i/70;
-        const v = Math.exp(-Math.pow((t-0.35-shift)*6,2))*(1+jitter);
-        const x = x0 + t*w*0.46;
-        const yv = y0+h - v*(h-8) - 4;
-        if (i===0) ctx.moveTo(x,yv); else ctx.lineTo(x,yv);
-      }
-      ctx.stroke();
-    }
-    for (let e = 0; e < 14; e++) {
+      return Math.exp(-Math.pow((t-0.35-shift)*6,2))*(1+jitter);
+    });
+    ensemblePanel(px2, 'Step response', (t) => {
       const jitter = (Math.random()-0.5)*0.12;
-      ctx.beginPath();
-      ctx.strokeStyle = 'rgba(60,78,54,0.28)';
-      ctx.lineWidth = 1.1;
-      for (let i = 0; i <= 70; i++) {
-        const t = i/70;
-        const v = stepResponseCurve(t) + jitter*(t>0.4 ? 1 : 0.3);
-        const x = x0 + w*0.54 + t*w*0.46;
-        const yv = y0+h - v*(h-8) - 4;
-        if (i===0) ctx.moveTo(x,yv); else ctx.lineTo(x,yv);
-      }
-      ctx.stroke();
-    }
-    label('Inferred parameter ensemble', x0, y0-14, {color: INK, weight:'600', size: 12, font: "'Inter', sans-serif"});
+      return stepResponseCurve(t) + jitter*(t>0.4 ? 1 : 0.3);
+    });
+
+    label('Each faint line is one sample from the Generator', px1, py0+panelH+34, {color: MUTED, size: 9.5});
   }
 
   function update() {
