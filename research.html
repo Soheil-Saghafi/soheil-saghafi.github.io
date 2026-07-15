@@ -88,8 +88,9 @@
         <div class="pipeline-panel">
           <p class="pipeline-step-title" id="pipeline-title"></p>
           <p class="pipeline-step-desc" id="pipeline-desc"></p>
-          <div class="pipeline-equation" id="pipeline-equation" style="display:none;"></div>
-          <canvas id="pipeline-canvas" width="700" height="280"></canvas>
+          <div class="pipeline-figure">
+            <img id="pipeline-image" src="images/pipeline-1.png" alt="">
+          </div>
         </div>
 
         <div class="pipeline-nav">
@@ -142,22 +143,12 @@
 
 <script>
 (function() {
-  const canvas = document.getElementById('pipeline-canvas');
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-  const W = canvas.width, H = canvas.height;
-  const INK = '#1E2A22', MUTED = '#6B6F63', ACCENT = '#5B7052', ACCENT_DEEP = '#3C4E36', RULE = '#DAD5C7', DANGER = '#B0433D', PAPER = '#F5F4EF', PAPER_RAISED = '#FCFBF8';
-
-  // ---- retina-sharp canvas setup ----
-  const dpr = window.devicePixelRatio || 1;
-  canvas.width = W * dpr;
-  canvas.height = H * dpr;
-  ctx.scale(dpr, dpr);
+  const img = document.getElementById('pipeline-image');
+  if (!img) return;
 
   const stepsEl = document.getElementById('pipeline-steps');
   const titleEl = document.getElementById('pipeline-title');
   const descEl = document.getElementById('pipeline-desc');
-  const eqEl = document.getElementById('pipeline-equation');
   const prevBtn = document.getElementById('pipeline-prev');
   const nextBtn = document.getElementById('pipeline-next');
 
@@ -166,37 +157,43 @@
       label: 'Model',
       title: '1. Mechanistic Model',
       desc: 'The neuron is modeled with eight ionic currents (NaT, NaP, CaT, CaH, KDR, KM, KH) plus a leak current, each governed by a gating variable that relaxes toward a voltage-dependent steady state.',
-      render: renderEquation
+      img: 'images/pipeline-1.png',
+      alt: 'Mechanistic model equations: membrane current balance and generic gating variable dynamics.'
     },
     {
       label: 'Optimization',
       title: '2. Global Optimization \u2192 Nominal Model',
       desc: 'Differential evolution fits the model\u2019s free parameters to representative voltage-clamp and current-clamp recordings, producing a \u201cnominal model\u201d that reproduces characteristic firing behavior.',
-      render: renderNominal
+      img: 'images/pipeline-2.png',
+      alt: 'Global optimization via differential evolution produces a nominal model, shown as an action potential trace and a step response trace.'
     },
     {
       label: 'Sensitivity',
       title: '3. Sensitivity Analysis \u2192 Dimensionality Reduction',
       desc: 'Sobol indices quantify how strongly each conductance influences the model\u2019s output. Parameters below a significance threshold (marked \u2715) are dropped, shrinking the space the GAN needs to search.',
-      render: renderSensitivity
+      img: 'images/pipeline-3.png',
+      alt: 'Bar chart of Sobol sensitivity indices for eight conductances, with three below-threshold parameters marked with an X.'
     },
     {
       label: 'Dataset',
       title: '4. Synthetic Dataset \u2192 Parameter\u2013Feature Pairs',
       desc: 'Sampling across the reduced parameter space and simulating the model produces a large synthetic dataset pairing parameters (P) with extracted trace features (F) \u2014 e.g. peak height, width, steady-state level.',
-      render: renderFeatures
+      img: 'images/pipeline-4.png',
+      alt: 'Voltage traces annotated with red feature markers for peak height, width, and steady-state level, used to build the parameter-feature dataset.'
     },
     {
       label: 'GAN',
       title: '5. Conditional GAN',
       desc: 'A conditional GAN trains on the synthetic (parameter, feature) pairs: the Generator proposes parameters given features, while the Discriminator learns to tell real pairs from generated ones \u2014 sharpening the Generator over time.',
-      render: renderGAN
+      img: 'images/pipeline-5.png',
+      alt: 'Diagram of a conditional GAN with Generator and Discriminator networks exchanging real and generated parameter-feature pairs.'
     },
     {
       label: 'Inference',
       title: '6. Trained Generator \u2192 Real Data',
       desc: 'Real experimental traces are reduced to their features and passed to the trained Generator, which outputs a distribution of plausible parameters \u2014 capturing the altered excitability seen in Alzheimer\u2019s disease models.',
-      render: renderInference
+      img: 'images/pipeline-6.png',
+      alt: 'Real experimental data features feed into the trained Generator, producing an ensemble of inferred parameter traces.'
     }
   ];
 
@@ -214,318 +211,13 @@
     });
   }
 
-  function clear() {
-    ctx.clearRect(0,0,W,H);
-  }
-
-  function label(text, x, y, opts) {
-    opts = opts || {};
-    ctx.fillStyle = opts.color || MUTED;
-    ctx.font = (opts.weight || '400') + ' ' + (opts.size || 11) + 'px ' + (opts.font || "'IBM Plex Mono', monospace");
-    ctx.textAlign = opts.align || 'left';
-    ctx.textBaseline = opts.baseline || 'alphabetic';
-    ctx.fillText(text, x, y);
-  }
-
-  function renderEquation() {
-    canvas.style.display = 'none';
-    eqEl.style.display = 'block';
-    eqEl.innerHTML =
-      '<div class="pipeline-eq-line">C &middot; dV/dt&nbsp; = &nbsp;I<sub>app</sub> &minus; I<sub>NaT</sub> &minus; I<sub>NaP</sub> &minus; I<sub>CaT</sub> &minus; I<sub>CaH</sub> &minus; I<sub>KDR</sub> &minus; I<sub>KM</sub> &minus; I<sub>L</sub> &minus; I<sub>KH</sub></div>' +
-      '<div class="pipeline-eq-line" style="margin-top:16px;">dx/dt&nbsp; = &nbsp;(x<sub>&infin;</sub> &minus; x) / &tau;<sub>x</sub></div>' +
-      '<div class="pipeline-eq-sub">x &isin; { h<sub>NaT</sub>, m<sub>CaT</sub>, h<sub>CaT</sub>, m<sub>CaH</sub>, h<sub>CaH</sub>, m<sub>KDR</sub>, h<sub>KDR</sub>, m<sub>KM</sub>, m<sub>H</sub>, n<sub>H</sub> }</div>';
-  }
-
-  // ---- shared chart frame with gridlines + ticks ----
-  function chartFrame(x0, y0, w, h, opts) {
-    opts = opts || {};
-    // horizontal gridlines
-    const rows = opts.rows || 4;
-    ctx.strokeStyle = RULE;
-    ctx.lineWidth = 1;
-    for (let r = 0; r <= rows; r++) {
-      const y = y0 + r*(h/rows);
-      ctx.beginPath();
-      ctx.moveTo(x0, y); ctx.lineTo(x0+w, y);
-      ctx.stroke();
-    }
-    // axes
-    ctx.strokeStyle = '#B9B3A2';
-    ctx.lineWidth = 1.2;
-    ctx.beginPath();
-    ctx.moveTo(x0, y0); ctx.lineTo(x0, y0+h);
-    ctx.lineTo(x0+w, y0+h);
-    ctx.stroke();
-  }
-
-  function renderNominal() {
-    canvas.style.display = 'block';
-    eqEl.style.display = 'none';
-    clear();
-    const gap = 70;
-    const panelW = (W - 90 - gap)/2, h = 156, y0 = 56;
-
-    function drawPanel(x0, curveFn, title, yTicks) {
-      chartFrame(x0, y0, panelW, h);
-      yTicks.forEach((t, i) => {
-        label(t, x0-8, y0 + i*(h/(yTicks.length-1)) + 3, {align:'right', size:10});
-      });
-      ctx.beginPath();
-      ctx.strokeStyle = ACCENT;
-      ctx.lineWidth = 2.2;
-      ctx.lineJoin = 'round';
-      for (let i = 0; i <= 120; i++) {
-        const t = i/120;
-        const v = curveFn(t);
-        const x = x0 + t*panelW;
-        const yv = y0+h - v*(h-8) - 4;
-        if (i===0) ctx.moveTo(x,yv); else ctx.lineTo(x,yv);
-      }
-      ctx.stroke();
-      label(title, x0, y0-18, {color: INK, weight: '600', size: 12, font: "'Inter', sans-serif"});
-      label('time \u2192', x0+panelW, y0+h+20, {align:'right', size: 10});
-    }
-
-    drawPanel(50, t => Math.exp(-Math.pow((t-0.35)*6,2)), 'Action potential', ['40','0','-40','-80','-120']);
-    drawPanel(50+panelW+gap, t => {
-      if (t < 0.15) return 0.85;
-      if (t < 0.25) return 0.85 - (t-0.15)/0.10*0.75;
-      return 0.10 + (1-Math.exp(-(t-0.25)*8))*0.55;
-    }, 'Step response', ['40','0','-40','-80','-120']);
-
-    label('Voltage (mV)', 14, 18, {align:'left', size: 11});
-  }
-
-  const SOBOL_LABELS = ['gNaT','gNaP','gCaH','gL','gKDR','gKM','gCaT','gH'];
-  const SOBOL_VALUES = [0.62, 0.06, 0.32, 0.08, 0.85, 0.28, 0.07, 0.45];
-  const SOBOL_EXCLUDE = [1, 3, 6];
-  const SOBOL_THRESHOLD = 0.15;
-
-  function renderSensitivity() {
-    canvas.style.display = 'block';
-    eqEl.style.display = 'none';
-    clear();
-    const x0 = 60, y0 = 30, w = W-100, h = 170;
-    chartFrame(x0, y0, w, h, {rows: 4});
-
-    ['1.0','0.75','0.5','0.25','0'].forEach((t,i) => {
-      label(t, x0-10, y0 + i*(h/4) + 3, {align:'right', size:10});
-    });
-
-    const n = SOBOL_LABELS.length;
-    const barW = w/n * 0.5;
-    const slot = w/n;
-
-    const threshY = y0 + h - SOBOL_THRESHOLD*h;
-    ctx.setLineDash([5,4]);
-    ctx.strokeStyle = DANGER;
-    ctx.lineWidth = 1.3;
-    ctx.beginPath();
-    ctx.moveTo(x0, threshY); ctx.lineTo(x0+w, threshY);
-    ctx.stroke();
-    ctx.setLineDash([]);
-
-    SOBOL_LABELS.forEach((lab, i) => {
-      const val = SOBOL_VALUES[i];
-      const barH = val*h;
-      const bx = x0 + i*slot + (slot-barW)/2;
-      const by = y0+h-barH;
-      const excluded = SOBOL_EXCLUDE.includes(i);
-
-      // subtle rounded top bar
-      ctx.fillStyle = excluded ? '#D8D2C2' : ACCENT;
-      roundRectTop(bx, by, barW, barH, 3);
-      ctx.fill();
-
-      label(lab, bx+barW/2, y0+h+16, {align:'center', size: 10.5});
-
-      if (excluded) {
-        label('\u2715', bx+barW/2, by-10, {align:'center', color: DANGER, size: 13, weight:'600', font:"'Inter', sans-serif"});
-      }
-    });
-
-    const labelCx = x0 + (3+0.5)*slot; // above the short "gL" bar, clear of tall bars
-    label('threshold', labelCx, threshY-10, {align:'center', color: DANGER, size: 10});
-    label('Sobol index', 16, y0-14, {color: INK, weight:'600', size: 12, font: "'Inter', sans-serif"});
-  }
-
-  function roundRectTop(x,y,w,h,r) {
-    if (h < r) r = h;
-    ctx.beginPath();
-    ctx.moveTo(x, y+h);
-    ctx.lineTo(x, y+r);
-    ctx.arcTo(x, y, x+r, y, r);
-    ctx.lineTo(x+w-r, y);
-    ctx.arcTo(x+w, y, x+w, y+r, r);
-    ctx.lineTo(x+w, y+h);
-    ctx.closePath();
-  }
-
-  function renderFeatures() {
-    canvas.style.display = 'block';
-    eqEl.style.display = 'none';
-    clear();
-    const gap = 70;
-    const panelW = (W-90-gap)/2, h = 156, y0 = 56;
-
-    function drawPanel(x0, curveFn, markerIdxs, title) {
-      chartFrame(x0, y0, panelW, h);
-      const pts = [];
-      ctx.beginPath();
-      ctx.strokeStyle = ACCENT_DEEP;
-      ctx.lineWidth = 2.2;
-      for (let i = 0; i <= 120; i++) {
-        const t = i/120;
-        const v = curveFn(t);
-        const x = x0 + t*panelW;
-        const yv = y0+h - v*(h-8) - 4;
-        if (i===0) ctx.moveTo(x,yv); else ctx.lineTo(x,yv);
-        if (markerIdxs.includes(i)) pts.push([x,yv]);
-      }
-      ctx.stroke();
-      pts.forEach(p => {
-        ctx.beginPath();
-        ctx.fillStyle = '#FFFFFF';
-        ctx.arc(p[0], p[1], 5, 0, Math.PI*2);
-        ctx.fill();
-        ctx.beginPath();
-        ctx.fillStyle = '#C0524A';
-        ctx.arc(p[0], p[1], 4, 0, Math.PI*2);
-        ctx.fill();
-      });
-      label(title, x0, y0-18, {color: INK, weight: '600', size: 12, font: "'Inter', sans-serif"});
-      label('time \u2192', x0+panelW, y0+h+20, {align:'right', size: 10});
-    }
-
-    drawPanel(50, t => Math.exp(-Math.pow((t-0.35)*6,2)), [18,42,66], 'Peak height & width');
-    drawPanel(50+panelW+gap, t => {
-      if (t < 0.15) return 0.85;
-      if (t < 0.25) return 0.85 - (t-0.15)/0.10*0.75;
-      return 0.10 + (1-Math.exp(-(t-0.25)*8))*0.55;
-    }, [17,29,84], 'Drop & recovery level');
-
-    label('Voltage', 14, 18, {align:'left', size: 11});
-  }
-
-  // ---- diagram primitives ----
-  function roundRect(x,y,w,h,r) {
-    ctx.beginPath();
-    ctx.moveTo(x+r,y);
-    ctx.arcTo(x+w,y,x+w,y+h,r);
-    ctx.arcTo(x+w,y+h,x,y+h,r);
-    ctx.arcTo(x,y+h,x,y,r);
-    ctx.arcTo(x,y,x+w,y,r);
-    ctx.closePath();
-  }
-
-  function box(x,y,w,h,text,opts) {
-    opts = opts || {};
-    ctx.save();
-    ctx.shadowColor = 'rgba(30,42,34,0.12)';
-    ctx.shadowBlur = 6;
-    ctx.shadowOffsetY = 2;
-    ctx.fillStyle = opts.fill || PAPER_RAISED;
-    roundRect(x,y,w,h,8);
-    ctx.fill();
-    ctx.restore();
-
-    ctx.strokeStyle = opts.stroke || ACCENT_DEEP;
-    ctx.lineWidth = 1.4;
-    roundRect(x,y,w,h,8);
-    ctx.stroke();
-
-    ctx.fillStyle = INK;
-    ctx.font = (opts.weight || '600') + ' 13px Inter, sans-serif';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    // support two-line labels split on \n
-    const lines = String(text).split('\n');
-    const lh = 15;
-    const startY = y+h/2 - (lines.length-1)*lh/2;
-    lines.forEach((ln,i) => ctx.fillText(ln, x+w/2, startY + i*lh));
-    ctx.textBaseline = 'alphabetic';
-  }
-
-  function arrow(x1,y1,x2,y2,opts) {
-    opts = opts || {};
-    ctx.strokeStyle = opts.color || '#9AA08E';
-    ctx.lineWidth = opts.width || 1.6;
-    if (opts.dashed) ctx.setLineDash([5,4]); else ctx.setLineDash([]);
-    ctx.beginPath();
-    ctx.moveTo(x1,y1); ctx.lineTo(x2,y2);
-    ctx.stroke();
-    ctx.setLineDash([]);
-    const angle = Math.atan2(y2-y1, x2-x1);
-    ctx.beginPath();
-    ctx.moveTo(x2,y2);
-    ctx.lineTo(x2-9*Math.cos(angle-0.35), y2-9*Math.sin(angle-0.35));
-    ctx.lineTo(x2-9*Math.cos(angle+0.35), y2-9*Math.sin(angle+0.35));
-    ctx.closePath();
-    ctx.fillStyle = opts.color || '#9AA08E';
-    ctx.fill();
-  }
-
-  function renderGAN() {
-    canvas.style.display = 'block';
-    eqEl.style.display = 'none';
-    clear();
-
-    const cx = W/2;
-    label('[P\u1D63, F]', 50, 46, {color: INK, size: 13, font: "'Inter', sans-serif", weight:'600'});
-    arrow(112, 42, 250, 42, {color: MUTED});
-
-    box(260, 18, 170, 52, 'Discriminator');
-    box(260, 152, 170, 52, 'Generator', {fill: 'rgba(91,112,82,0.10)'});
-
-    arrow(345, 152, 345, 78, {dashed:true, color: MUTED});
-    label('feedback', 358, 118, {size: 9.5, color: MUTED});
-    arrow(345, 70, 345, 18, {color: MUTED});
-    label('real vs. generated', 345, 108, {align:'center', size: 9.5, color: MUTED});
-
-    label('P\u1D4D | F', 480, 182, {color: INK, size: 13, font: "'Inter', sans-serif", weight:'600'});
-    arrow(430, 178, 470, 178, {color: MUTED});
-  }
-
-  function renderInference() {
-    canvas.style.display = 'block';
-    eqEl.style.display = 'none';
-    clear();
-
-    box(20, 100, 120, 48, 'Real Data');
-    arrow(80, 100, 80, 50, {color: MUTED});
-    label('F\u1D63', 80, 38, {align:'center', color: INK, size: 12.5, weight:'600', font:"'Inter', sans-serif"});
-
-    arrow(148, 32, 250, 32, {color: MUTED});
-    box(260, 8, 170, 48, 'Trained\nGenerator');
-    arrow(345, 56, 345, 100, {color: MUTED});
-    label('P\u1D4D | F\u1D63', 345, 122, {align:'center', color: INK, size: 12.5, weight:'600', font:"'Inter', sans-serif"});
-
-    const x0 = 470, y0 = 40, w = 190, h = 160;
-    chartFrame(x0, y0, w, h, {rows: 3});
-    for (let e = 0; e < 14; e++) {
-      const jitter = (Math.random()-0.5)*0.15;
-      const shift = (Math.random()-0.5)*0.08;
-      ctx.beginPath();
-      ctx.strokeStyle = 'rgba(60,78,54,0.28)';
-      ctx.lineWidth = 1.1;
-      for (let i = 0; i <= 70; i++) {
-        const t = i/70;
-        const v = Math.exp(-Math.pow((t-0.35-shift)*6,2))*(1+jitter);
-        const x = x0 + t*w;
-        const yv = y0+h - v*(h-8) - 4;
-        if (i===0) ctx.moveTo(x,yv); else ctx.lineTo(x,yv);
-      }
-      ctx.stroke();
-    }
-    label('Inferred parameter ensemble', x0, y0-16, {color: INK, weight:'600', size: 12, font: "'Inter', sans-serif"});
-  }
-
   function update() {
     buildStepper();
     const s = STEPS[current];
     titleEl.textContent = s.title;
     descEl.textContent = s.desc;
-    s.render();
+    img.src = s.img;
+    img.alt = s.alt;
     prevBtn.disabled = current === 0;
     nextBtn.disabled = current === STEPS.length - 1;
   }
