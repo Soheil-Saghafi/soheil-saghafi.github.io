@@ -89,7 +89,7 @@
           <p class="pipeline-step-title" id="pipeline-title"></p>
           <p class="pipeline-step-desc" id="pipeline-desc"></p>
           <div class="pipeline-equation" id="pipeline-equation" style="display:none;"></div>
-          <canvas id="pipeline-canvas" width="700" height="300"></canvas>
+          <canvas id="pipeline-canvas" width="700" height="320"></canvas>
         </div>
 
         <div class="pipeline-nav">
@@ -452,51 +452,70 @@
     ctx.fill();
   }
 
-  // Layout follows the real graphical abstract: a T-shaped input arrow
-  // splits to the Discriminator (right) and Generator (down); dashed
-  // lines carry each box's output to the other, forming the adversarial loop.
+  // Discriminator and Generator stacked vertically (as in the source figure);
+  // the input pair splits to both networks, the Generator's output flows
+  // right, and a single labeled dashed arrow shows the adversarial feedback.
   function renderGAN() {
     canvas.style.display = 'block';
     eqEl.style.display = 'none';
     clear();
 
-    label('[P\u1D63, F]', 45, 66, {color: INK, size: 13, font: "'Inter', sans-serif", weight:'600'});
+    const discX = 300, discY = 30, discW = 230, discH = 64;
+    const genX = 300, genY = 226, genW = 230, genH = 64;
+    const discCy = discY + discH/2;
+    const genCy = genY + genH/2;
+    const junctionX = 190;
 
-    const stemX = 150, stemTopY = 62, stemBotY = 150;
-    arrow(105, 66, 250, 66, {color: ACCENT, width: 3});
-    arrow(stemX, 66, stemX, stemBotY, {color: ACCENT, width: 3});
+    label('[P\u1D63, F]', 40, discCy+5, {color: INK, size: 14, font: "'Inter', sans-serif", weight:'600'});
 
-    box(260, 40, 190, 54, 'Discriminator');
-    box(150-75, 160, 190, 54, 'Generator', {fill: 'rgba(91,112,82,0.10)'});
+    arrow(108, discCy, junctionX, discCy, {color: ACCENT, width: 2.5});
+    ctx.beginPath();
+    ctx.fillStyle = ACCENT_DEEP;
+    ctx.arc(junctionX, discCy, 3.5, 0, Math.PI*2);
+    ctx.fill();
+    arrow(junctionX, discCy, discX-10, discCy, {color: ACCENT, width: 2.5});
+    arrow(junctionX, discCy, junctionX, genCy, {color: ACCENT, width: 2.5});
+    arrow(junctionX, genCy, genX-10, genCy, {color: ACCENT, width: 2.5});
 
-    // dashed feedback loop: Generator bottom -> right -> up to Discriminator bottom
-    polyArrow([[150-75+95, 214], [150-75+95, 250], [355, 250], [355, 94]], {dashed:true, color: MUTED});
-    label('real vs. generated', 260, 244, {size: 9.5, color: MUTED});
+    box(discX, discY, discW, discH, 'Discriminator', {weight: '700'});
+    box(genX, genY, genW, genH, 'Generator', {fill: 'rgba(91,112,82,0.10)', weight: '700'});
 
-    // upward arrow between the two boxes (as in the original figure)
-    arrow(300, 160, 300, 100, {color: ACCENT, width: 3});
+    const outX = genX + genW;
+    arrow(outX, genCy, outX+55, genCy, {color: ACCENT, width: 2.5});
+    label('P\u1D4D | F', outX+64, genCy+5, {color: INK, size: 14, font: "'Inter', sans-serif", weight:'600'});
 
-    label('P\u1D4D | F', 260, 190, {color: INK, size: 13, font: "'Inter', sans-serif", weight:'600'});
-    arrow(230, 187, 255, 187, {color: ACCENT, width: 2.5});
+    const fbX = discX + discW*0.32;
+    arrow(fbX, genY, fbX, discY+discH, {dashed: true, color: MUTED, width: 1.6});
+    label('generated (fake) pair', fbX+14, (discY+discH+genY)/2 + 4, {color: MUTED, size: 10.5});
+
+    label('Conditional GAN training loop', discX, discY-14, {color: INK, weight:'600', size: 12, font: "'Inter', sans-serif"});
   }
 
-  // Layout follows the real graphical abstract: Real Data feeds features
-  // up into the Trained Generator, which outputs parameters to the left;
-  // the two example thumbnails on the right show inferred trace ensembles.
+  // Real Data feeds its features up into the Trained Generator, whose
+  // output flows left; the framed panel on the right shows the resulting
+  // ensemble of inferred parameter traces.
   function renderInference() {
     canvas.style.display = 'block';
     eqEl.style.display = 'none';
     clear();
 
-    box(20, 200, 130, 46, 'Real Data');
-    arrow(85, 200, 85, 100, {color: ACCENT, width: 3});
-    label('F\u1D63', 100, 130, {align:'left', color: INK, size: 12.5, weight:'600', font:"'Inter', sans-serif"});
+    const genX = 200, genY = 40, genW = 190, genH = 64;
+    const dataW = 170, dataH = 56;
+    const genCx = genX + genW/2;
+    const dataX = genCx - dataW/2, dataY = 230;
 
-    box(230, 70, 170, 60, 'Trained\nGenerator');
-    label('P\u1D4D | F\u1D63', 45, 104, {align:'left', color: INK, size: 12.5, weight:'600', font:"'Inter', sans-serif"});
-    arrow(225, 100, 165, 100, {color: ACCENT, width: 3});
+    box(genX, genY, genW, genH, 'Trained\nGenerator', {weight:'700'});
+    box(dataX, dataY, dataW, dataH, 'Real Data', {weight:'700'});
 
-    const x0 = 440, y0 = 30, w = 240, h = 190;
+    arrow(genCx, dataY, genCx, genY+genH, {color: ACCENT, width: 2.5});
+    label('F\u1D63', genCx+16, (dataY+genY+genH)/2 + 4, {color: INK, size: 13, weight:'600', font:"'Inter', sans-serif"});
+
+    const outArrowEndX = genX - 60;
+    arrow(genX, genY+genH*0.5, outArrowEndX, genY+genH*0.5, {color: ACCENT, width: 2.5});
+    label('P\u1D4D | F\u1D63', outArrowEndX-10, genY+genH*0.5+5, {align:'right', color: INK, size: 13, weight:'600', font:"'Inter', sans-serif"});
+
+    const x0 = 460, y0 = 40, w = 210, h = 220;
+    chartFrame(x0, y0, w, h, {rows: 3});
     for (let e = 0; e < 14; e++) {
       const jitter = (Math.random()-0.5)*0.15;
       const shift = (Math.random()-0.5)*0.08;
@@ -506,7 +525,7 @@
       for (let i = 0; i <= 70; i++) {
         const t = i/70;
         const v = Math.exp(-Math.pow((t-0.35-shift)*6,2))*(1+jitter);
-        const x = x0 + t*w*0.48;
+        const x = x0 + t*w*0.46;
         const yv = y0+h - v*(h-8) - 4;
         if (i===0) ctx.moveTo(x,yv); else ctx.lineTo(x,yv);
       }
@@ -520,13 +539,13 @@
       for (let i = 0; i <= 70; i++) {
         const t = i/70;
         const v = stepResponseCurve(t) + jitter*(t>0.4 ? 1 : 0.3);
-        const x = x0 + w*0.52 + t*w*0.48;
+        const x = x0 + w*0.54 + t*w*0.46;
         const yv = y0+h - v*(h-8) - 4;
         if (i===0) ctx.moveTo(x,yv); else ctx.lineTo(x,yv);
       }
       ctx.stroke();
     }
-    label('Inferred parameter ensemble', x0, y0-10, {color: INK, weight:'600', size: 12, font: "'Inter', sans-serif"});
+    label('Inferred parameter ensemble', x0, y0-14, {color: INK, weight:'600', size: 12, font: "'Inter', sans-serif"});
   }
 
   function update() {
