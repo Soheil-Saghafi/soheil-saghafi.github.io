@@ -126,6 +126,150 @@
             </div>
           </div>
         </details>
+
+        <details class="ra-project">
+          <summary class="ra-project-summary">
+            <span class="ra-project-title">Modeling Circadian Clock Regulation of Immune System Response to SARS-CoV-2 Infection</span>
+            <span class="ra-project-chevron" aria-hidden="true"></span>
+          </summary>
+          <div class="ra-project-body">
+            <p>
+              In
+              <a href="https://doi.org/10.1177/07487304251370409" target="_blank" rel="noopener">Modeling Circadian Clock Regulation of Immune System Response to SARS-CoV-2 Infection and Antiviral Treatment</a>
+              (Wei, Saghafi, Khan &amp; Diekman, <em>Journal of Biological Rhythms</em>, 2025), we coupled a
+              circadian pacemaker model to a mechanistic model of SARS-CoV-2 infection dynamics and
+              immune response fit to viral load data from COVID-19 patients.
+            </p>
+            <p>
+              Driving each of the immune model's 11 parameters with the circadian clock signal, we found
+              that circadian variation in some parameters (e.g. the innate immune response rate and viral
+              death rate) speeds up viral clearance, while variation in others (e.g. the infection rate and
+              viral production rate) slows it down. Simulating treatment with the antiviral drug remdesivir,
+              we further found that a dose given in the morning (ZT0) clears the virus substantially faster
+              than the same dose given in the evening (ZT12) &mdash; a proof-of-concept for chronotherapy in
+              COVID-19 treatment.
+            </p>
+            <div class="ra-figure">
+              <svg viewBox="0 0 720 470" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Schematic of the coupled circadian clock, immune system, and remdesivir treatment model" style="width:100%;max-width:640px;display:block;margin:0 auto;">
+                <defs>
+                  <marker id="arrowMuted" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+                    <path d="M0,0 L10,5 L0,10 z" fill="#6B6F63"/>
+                  </marker>
+                  <marker id="arrowAccent" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+                    <path d="M0,0 L10,5 L0,10 z" fill="#5B7052"/>
+                  </marker>
+                  <marker id="arrowDeep" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+                    <path d="M0,0 L10,5 L0,10 z" fill="#3C4E36"/>
+                  </marker>
+                </defs>
+
+                <!-- panel frames -->
+                <rect x="16" y="18" width="278" height="222" rx="10" fill="#FCFBF8" stroke="#DAD5C7"/>
+                <text x="32" y="40" font-family="'Inter', sans-serif" font-weight="600" font-size="13" fill="#1E2A22">Circadian Clock</text>
+
+                <rect x="326" y="18" width="378" height="264" rx="10" fill="#FCFBF8" stroke="#DAD5C7"/>
+                <text x="342" y="40" font-family="'Inter', sans-serif" font-weight="600" font-size="13" fill="#1E2A22">Immune System</text>
+
+                <rect x="326" y="316" width="378" height="138" rx="10" fill="#FCFBF8" stroke="#DAD5C7"/>
+                <text x="342" y="338" font-family="'Inter', sans-serif" font-weight="600" font-size="13" fill="#1E2A22">Remdesivir (Antiviral Treatment)</text>
+
+                <!-- circadian: zeta input -->
+                <line x1="155" y1="52" x2="155" y2="74" stroke="#6B6F63" stroke-width="1.6" marker-end="url(#arrowMuted)"/>
+                <text x="138" y="60" font-family="'IBM Plex Mono', monospace" font-style="italic" font-size="12" fill="#6B6F63">&#950;</text>
+
+                <!-- circadian nodes -->
+                <circle cx="155" cy="100" r="24" fill="#FCFBF8" stroke="#6B6F63" stroke-width="1.6"/>
+                <text x="155" y="105" text-anchor="middle" font-family="'IBM Plex Mono', monospace" font-weight="600" font-size="14" fill="#1E2A22">n</text>
+
+                <circle cx="95" cy="192" r="24" fill="#DAD5C7" stroke="#6B6F63" stroke-width="1.6"/>
+                <text x="95" y="197" text-anchor="middle" font-family="'IBM Plex Mono', monospace" font-weight="600" font-size="14" fill="#1E2A22">A</text>
+
+                <circle cx="215" cy="192" r="24" fill="#5B7052" stroke="#3C4E36" stroke-width="1.6"/>
+                <text x="215" y="197" text-anchor="middle" font-family="'IBM Plex Mono', monospace" font-weight="600" font-size="14" fill="#FFFFFF">C</text>
+
+                <line x1="140" y1="119" x2="106" y2="171" stroke="#6B6F63" stroke-width="1.4" marker-end="url(#arrowMuted)"/>
+                <line x1="170" y1="119" x2="204" y2="171" stroke="#6B6F63" stroke-width="1.4" marker-end="url(#arrowMuted)"/>
+                <line x1="121" y1="192" x2="189" y2="192" stroke="#6B6F63" stroke-width="1.4" marker-start="url(#arrowMuted)" marker-end="url(#arrowMuted)"/>
+
+                <!-- circadian output -> immune system -->
+                <path d="M239,188 C 270,180 296,150 324,138" fill="none" stroke="#5B7052" stroke-width="2.2" marker-end="url(#arrowAccent)"/>
+                <text x="252" y="132" font-family="'Inter', sans-serif" font-style="italic" font-size="10.5" fill="#3C4E36">modulates 11 immune</text>
+                <text x="252" y="145" font-family="'Inter', sans-serif" font-style="italic" font-size="10.5" fill="#3C4E36">-system parameters</text>
+
+                <!-- immune nodes -->
+                <circle cx="382" cy="86" r="24" fill="#5B7052" stroke="#3C4E36" stroke-width="1.6"/>
+                <text x="382" y="91" text-anchor="middle" font-family="'IBM Plex Mono', monospace" font-weight="600" font-size="14" fill="#FFFFFF">S</text>
+
+                <circle cx="500" cy="160" r="26" fill="#A65344" stroke="#7C3F34" stroke-width="1.6"/>
+                <text x="500" y="165" text-anchor="middle" font-family="'IBM Plex Mono', monospace" font-weight="600" font-size="14" fill="#FFFFFF">I</text>
+
+                <circle cx="500" cy="262" r="24" fill="#B8862E" stroke="#8C6620" stroke-width="1.6"/>
+                <text x="500" y="267" text-anchor="middle" font-family="'IBM Plex Mono', monospace" font-weight="600" font-size="14" fill="#FFFFFF">V</text>
+
+                <circle cx="612" cy="86" r="22" fill="#51708A" stroke="#3B5266" stroke-width="1.6"/>
+                <text x="612" y="90" text-anchor="middle" font-family="'IBM Plex Mono', monospace" font-weight="600" font-size="12" fill="#FFFFFF">M&#8321;</text>
+
+                <circle cx="612" cy="160" r="22" fill="#51708A" stroke="#3B5266" stroke-width="1.6"/>
+                <text x="612" y="164" text-anchor="middle" font-family="'IBM Plex Mono', monospace" font-weight="600" font-size="12" fill="#FFFFFF">M&#8322;</text>
+
+                <circle cx="612" cy="232" r="24" fill="#6B4C74" stroke="#4E3654" stroke-width="1.6"/>
+                <text x="612" y="237" text-anchor="middle" font-family="'IBM Plex Mono', monospace" font-weight="600" font-size="14" fill="#FFFFFF">E</text>
+
+                <!-- immune arrows -->
+                <line x1="400" y1="102" x2="478" y2="146" stroke="#5B7052" stroke-width="2" marker-end="url(#arrowAccent)"/>
+                <text x="418" y="112" font-family="'IBM Plex Mono', monospace" font-size="11" fill="#3C4E36">&#946;</text>
+
+                <line x1="500" y1="186" x2="500" y2="236" stroke="#5B7052" stroke-width="2" marker-end="url(#arrowAccent)"/>
+                <text x="512" y="215" font-family="'IBM Plex Mono', monospace" font-size="11" fill="#3C4E36">&#960;</text>
+
+                <path d="M488,160 C 470,150 470,130 486,120" fill="none" stroke="#6B6F63" stroke-width="1.4" marker-end="url(#arrowMuted)"/>
+                <text x="452" y="128" font-family="'IBM Plex Mono', monospace" font-size="10.5" fill="#6B6F63">&#948;, k</text>
+
+                <path d="M522,278 C 546,278 546,250 528,240" fill="none" stroke="#6B6F63" stroke-width="1.4" marker-end="url(#arrowMuted)"/>
+                <text x="540" y="272" font-family="'IBM Plex Mono', monospace" font-size="10.5" fill="#6B6F63">&#947;</text>
+
+                <path d="M598,222 C 560,206 540,190 520,174" fill="none" stroke="#3C4E36" stroke-width="1.6" stroke-dasharray="4,3" marker-end="url(#arrowDeep)"/>
+                <text x="545" y="200" font-family="'IBM Plex Mono', monospace" font-size="10.5" fill="#3C4E36">m, r, &#966;</text>
+
+                <line x1="522" y1="146" x2="592" y2="98" stroke="#5B7052" stroke-width="2" marker-end="url(#arrowAccent)"/>
+                <text x="548" y="112" font-family="'IBM Plex Mono', monospace" font-size="11" fill="#3C4E36">&#969;</text>
+
+                <line x1="612" y1="108" x2="612" y2="136" stroke="#5B7052" stroke-width="2" marker-end="url(#arrowAccent)"/>
+                <text x="620" y="126" font-family="'IBM Plex Mono', monospace" font-size="11" fill="#3C4E36">q</text>
+
+                <line x1="612" y1="184" x2="612" y2="206" stroke="#5B7052" stroke-width="2" marker-end="url(#arrowAccent)"/>
+                <text x="620" y="199" font-family="'IBM Plex Mono', monospace" font-size="11" fill="#3C4E36">q</text>
+
+                <path d="M632,222 C 654,214 654,196 640,186" fill="none" stroke="#6B6F63" stroke-width="1.4" marker-end="url(#arrowMuted)"/>
+                <text x="646" y="212" font-family="'IBM Plex Mono', monospace" font-size="10.5" fill="#6B6F63">&#948;&#7869;</text>
+
+                <!-- remdesivir nodes -->
+                <circle cx="410" cy="386" r="22" fill="#FCFBF8" stroke="#3C4E36" stroke-width="1.6"/>
+                <text x="410" y="391" text-anchor="middle" font-family="'IBM Plex Mono', monospace" font-weight="600" font-size="12.5" fill="#1E2A22">C&#7472;</text>
+
+                <circle cx="560" cy="386" r="22" fill="#EDEFE9" stroke="#3C4E36" stroke-width="1.6"/>
+                <text x="560" y="391" text-anchor="middle" font-family="'IBM Plex Mono', monospace" font-weight="600" font-size="12.5" fill="#1E2A22">C&#7480;</text>
+
+                <line x1="410" y1="440" x2="410" y2="410" stroke="#5B7052" stroke-width="2" marker-end="url(#arrowAccent)"/>
+                <text x="352" y="452" font-family="'Inter', sans-serif" font-size="10.5" fill="#6B6F63">IV administration</text>
+
+                <line x1="432" y1="386" x2="536" y2="386" stroke="#5B7052" stroke-width="2" marker-end="url(#arrowAccent)"/>
+                <text x="470" y="378" font-family="'IBM Plex Mono', monospace" font-size="11" fill="#3C4E36">k&#7623;&#7452;</text>
+
+                <line x1="396" y1="404" x2="374" y2="428" stroke="#6B6F63" stroke-width="1.4" marker-end="url(#arrowMuted)"/>
+                <text x="352" y="440" font-family="'IBM Plex Mono', monospace" font-size="10.5" fill="#6B6F63">k&#7580;</text>
+
+                <line x1="574" y1="404" x2="596" y2="428" stroke="#6B6F63" stroke-width="1.4" marker-end="url(#arrowMuted)"/>
+                <text x="592" y="440" font-family="'IBM Plex Mono', monospace" font-size="10.5" fill="#6B6F63">k&#7476;</text>
+
+                <path d="M560,364 C 560,330 528,296 512,284" fill="none" stroke="#3C4E36" stroke-width="1.8" stroke-dasharray="4,3" marker-end="url(#arrowDeep)"/>
+                <text x="565" y="320" font-family="'IBM Plex Mono', monospace" font-size="11" fill="#3C4E36">&#949;</text>
+                <text x="565" y="333" font-family="'Inter', sans-serif" font-style="italic" font-size="9.5" fill="#6B6F63">inhibits &#960; by (1&minus;&#949;)</text>
+              </svg>
+              <p class="ra-figure-caption">Schematic of the coupled model: a circadian pacemaker (n, A, C) modulates 11 parameters of the immune-response model (S, V, I, M&#8321;, M&#8322;, E), which is in turn treated with the antiviral drug remdesivir (C&#7472;, C&#7480;) whose active form reduces the viral production rate by a factor of 1&minus;&#949;.</p>
+            </div>
+          </div>
+        </details>
       </div>
     </details>
 
