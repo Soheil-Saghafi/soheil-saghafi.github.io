@@ -25,7 +25,7 @@
 </header>
 
 <main>
-  <p class="placeholder-note">Placeholder entries below — replace with your real research areas and projects.</p>
+  <p class="placeholder-note">Overview and Current Projects below are still placeholder text — send real details whenever you're ready. The Research Areas section now includes a live demo for Mathematical Modeling &amp; Applied Mathematics.</p>
 
   <h1>Research</h1>
 
@@ -61,10 +61,84 @@
 
   <section>
     <h2>Research Areas</h2>
-    <div class="tag-row">
-      <span class="tag">[Area One]</span>
-      <span class="tag">[Area Two]</span>
-      <span class="tag">[Area Three]</span>
+
+    <div class="research-area">
+      <h3>Mathematical Modeling &amp; Applied Mathematics</h3>
+      <p>
+        A central theme of my work is building conductance-based biophysical
+        models of excitable cells and inferring their parameters from data.
+        In
+        <a href="publications.html">Inferring Parameters of Populations of Pyramidal Neuron Models in Alzheimer's Disease Mouse Models Using Generative Adversarial Networks</a>,
+        we used a Hodgkin-Huxley-style model of pyramidal neuron excitability and
+        a GAN-based inference scheme to recover ion-channel conductances that
+        reproduce experimentally observed firing patterns &mdash; including the
+        altered excitability seen in Alzheimer's disease mouse models.
+      </p>
+      <p>
+        The widget below is a live version of that underlying biophysical model.
+        Adjust the conductances the same way the GAN searches over them, and
+        watch how the simulated neuron's firing pattern changes &mdash; then
+        toggle the baseline comparison to see the kind of shift in excitability
+        our inference method is designed to detect.
+      </p>
+
+      <div class="hh-demo" id="hh-demo">
+        <div class="hh-controls">
+          <div class="hh-control">
+            <label for="hh-gna">Sodium conductance <span class="hh-unit">g<sub>Na</sub> (mS/cm&sup2;)</span></label>
+            <input type="range" id="hh-gna" min="20" max="160" step="1" value="120">
+            <span class="hh-value" id="hh-gna-val">120</span>
+          </div>
+          <div class="hh-control">
+            <label for="hh-gk">Potassium conductance <span class="hh-unit">g<sub>K</sub> (mS/cm&sup2;)</span></label>
+            <input type="range" id="hh-gk" min="5" max="60" step="1" value="36">
+            <span class="hh-value" id="hh-gk-val">36</span>
+          </div>
+          <div class="hh-control">
+            <label for="hh-gl">Leak conductance <span class="hh-unit">g<sub>L</sub> (mS/cm&sup2;)</span></label>
+            <input type="range" id="hh-gl" min="0.05" max="1.5" step="0.05" value="0.3">
+            <span class="hh-value" id="hh-gl-val">0.30</span>
+          </div>
+          <div class="hh-control">
+            <label for="hh-iapp">Applied current <span class="hh-unit">I<sub>app</sub> (&micro;A/cm&sup2;)</span></label>
+            <input type="range" id="hh-iapp" min="0" max="30" step="0.5" value="10">
+            <span class="hh-value" id="hh-iapp-val">10.0</span>
+          </div>
+        </div>
+
+        <label class="hh-checkbox">
+          <input type="checkbox" id="hh-baseline">
+          Compare to healthy baseline (g<sub>Na</sub>=120, g<sub>K</sub>=36, g<sub>L</sub>=0.3, I<sub>app</sub>=10)
+        </label>
+
+        <canvas id="hh-canvas" width="640" height="260"></canvas>
+        <p class="hh-caption">Simulated membrane voltage over 60&nbsp;ms &middot; sage = current settings<span id="hh-baseline-legend"></span></p>
+      </div>
+    </div>
+
+    <div class="research-area">
+      <h3>Artificial Intelligence &amp; Machine Learning</h3>
+      <p class="placeholder-note">Demo coming soon &mdash; let me know which paper or project you'd like featured here.</p>
+    </div>
+
+    <div class="research-area">
+      <h3>Data Science &amp; Statistical Modeling</h3>
+      <p class="placeholder-note">Demo coming soon &mdash; let me know which paper or project you'd like featured here.</p>
+    </div>
+
+    <div class="research-area">
+      <h3>Signal Processing &amp; Time-Series Analytics</h3>
+      <p class="placeholder-note">Demo coming soon &mdash; let me know which paper or project you'd like featured here.</p>
+    </div>
+
+    <div class="research-area">
+      <h3>Digital Health &amp; Healthcare Analytics</h3>
+      <p class="placeholder-note">Demo coming soon &mdash; let me know which paper or project you'd like featured here.</p>
+    </div>
+
+    <div class="research-area">
+      <h3>Quantitative Finance &amp; Financial Analytics</h3>
+      <p class="placeholder-note">Demo coming soon &mdash; let me know which paper or project you'd like featured here.</p>
     </div>
   </section>
 </main>
@@ -82,5 +156,136 @@
 </footer>
 
 <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+
+<script>
+(function() {
+  const canvas = document.getElementById('hh-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+
+  const gnaSlider = document.getElementById('hh-gna');
+  const gkSlider  = document.getElementById('hh-gk');
+  const glSlider  = document.getElementById('hh-gl');
+  const iappSlider = document.getElementById('hh-iapp');
+  const baselineCheckbox = document.getElementById('hh-baseline');
+  const legend = document.getElementById('hh-baseline-legend');
+
+  const vals = {
+    gna: document.getElementById('hh-gna-val'),
+    gk: document.getElementById('hh-gk-val'),
+    gl: document.getElementById('hh-gl-val'),
+    iapp: document.getElementById('hh-iapp-val')
+  };
+
+  const ENA = 50, EK = -77, EL = -54.387, C = 1;
+  const BASELINE = { gna: 120, gk: 36, gl: 0.3, iapp: 10 };
+
+  function rates(V) {
+    const am = (V === -40) ? 1 : 0.1*(V+40)/(1-Math.exp(-(V+40)/10));
+    const bm = 4*Math.exp(-(V+65)/18);
+    const ah = 0.07*Math.exp(-(V+65)/20);
+    const bh = 1/(1+Math.exp(-(V+35)/10));
+    const an = (V === -55) ? 0.1 : 0.01*(V+55)/(1-Math.exp(-(V+55)/10));
+    const bn = 0.125*Math.exp(-(V+65)/80);
+    return {am, bm, ah, bh, an, bn};
+  }
+
+  function simulate(params) {
+    const dt = 0.01, T = 60;
+    const steps = Math.round(T/dt);
+    let V = -65;
+    let r0 = rates(V);
+    let m = r0.am/(r0.am+r0.bm), h = r0.ah/(r0.ah+r0.bh), n = r0.an/(r0.an+r0.bn);
+    const trace = new Float32Array(steps);
+    for (let i = 0; i < steps; i++) {
+      const r = rates(V);
+      const dm = r.am*(1-m) - r.bm*m;
+      const dh = r.ah*(1-h) - r.bh*h;
+      const dn = r.an*(1-n) - r.bn*n;
+      const iNa = params.gna * m*m*m * h * (V-ENA);
+      const iK  = params.gk * n*n*n*n * (V-EK);
+      const iL  = params.gl * (V-EL);
+      const dV = (params.iapp - iNa - iK - iL) / C;
+      V += dV*dt; m += dm*dt; h += dh*dt; n += dn*dt;
+      trace[i] = V;
+    }
+    return trace;
+  }
+
+  function drawAxes() {
+    ctx.strokeStyle = '#DAD5C7';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    for (let gy = 0; gy <= 4; gy++) {
+      const y = 20 + gy*(H-50)/4;
+      ctx.moveTo(50, y); ctx.lineTo(W-10, y);
+    }
+    ctx.stroke();
+
+    ctx.fillStyle = '#6B6F63';
+    ctx.font = '11px IBM Plex Mono, monospace';
+    ctx.textAlign = 'right';
+    const mvLabels = [40, 0, -40, -80, -120];
+    for (let gy = 0; gy <= 4; gy++) {
+      const y = 20 + gy*(H-50)/4;
+      ctx.fillText(mvLabels[gy] + '', 44, y+3);
+    }
+    ctx.textAlign = 'left';
+    ctx.fillText('mV', 6, 16);
+    ctx.fillText('0 ms', 50, H-6);
+    ctx.fillText('60 ms', W-40, H-6);
+  }
+
+  function plotTrace(trace, color, dashed) {
+    const steps = trace.length;
+    const plotW = W - 60, plotH = H - 50;
+    ctx.beginPath();
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1.8;
+    if (dashed) ctx.setLineDash([4,3]); else ctx.setLineDash([]);
+    for (let i = 0; i < steps; i++) {
+      const x = 50 + (i/steps)*plotW;
+      const y = 20 + ((40 - trace[i]) / 160) * plotH;
+      if (i === 0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    }
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  function render() {
+    const params = {
+      gna: parseFloat(gnaSlider.value),
+      gk: parseFloat(gkSlider.value),
+      gl: parseFloat(glSlider.value),
+      iapp: parseFloat(iappSlider.value)
+    };
+    vals.gna.textContent = params.gna.toFixed(0);
+    vals.gk.textContent = params.gk.toFixed(0);
+    vals.gl.textContent = params.gl.toFixed(2);
+    vals.iapp.textContent = params.iapp.toFixed(1);
+
+    ctx.clearRect(0,0,W,H);
+    drawAxes();
+
+    if (baselineCheckbox.checked) {
+      const baseTrace = simulate(BASELINE);
+      plotTrace(baseTrace, '#9AA08E', true);
+      legend.textContent = ' · dashed gray = baseline';
+    } else {
+      legend.textContent = '';
+    }
+
+    const trace = simulate(params);
+    plotTrace(trace, '#5B7052', false);
+  }
+
+  [gnaSlider, gkSlider, glSlider, iappSlider, baselineCheckbox].forEach(el => {
+    el.addEventListener('input', render);
+  });
+
+  render();
+})();
+</script>
 </body>
 </html>
