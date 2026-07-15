@@ -96,8 +96,25 @@
         </div>
 
         <div class="ra-project">
-          <p class="ra-project-title">[Next Project Title]</p>
-          <p class="placeholder-note">Send the details for another project here &mdash; it'll appear as its own clearly separated block, optionally with its own interactive demo like the one above.</p>
+          <p class="ra-project-title">Dynamic Entrainment in the Hodgkin-Huxley Model</p>
+          <p>
+            In
+            <a href="https://pubs.aip.org/aip/cha/article-abstract/34/10/103124/3318400/Dynamic-entrainment-A-deep-learning-and-data?redirectedFrom=fulltext" target="_blank" rel="noopener">Dynamic Entrainment: A Deep Learning and Data-Driven Process Approach for Synchronization in the Hodgkin-Huxley Model</a>,
+            we studied how a neuron's spiking response to a repeated current
+            pulse depends continuously on a data-driven model parameter. The
+            figure below shows that dependence directly: as the parameter is
+            varied, a small subthreshold "echo" following the first spike
+            gradually grows until it crosses threshold and becomes a full
+            second spike &mdash; the system moving continuously from a
+            single-spike response to a fully entrained two-spike response to
+            the same repeated stimulus.
+          </p>
+          <div class="ra-figure">
+            <video controls loop muted playsinline poster="dynamic-entrainment-poster.png">
+              <source src="dynamic-entrainment-fig3e.mp4" type="video/mp4">
+            </video>
+            <p class="ra-figure-caption">Figure: simulated voltage response V(t) (black) to a repeated current pulse (red) as the fitted parameter varies &mdash; the second pulse's response grows from a subthreshold bump into a full spike.</p>
+          </div>
         </div>
       </div>
     </details>
