@@ -89,7 +89,7 @@
           <p class="pipeline-step-title" id="pipeline-title"></p>
           <p class="pipeline-step-desc" id="pipeline-desc"></p>
           <div class="pipeline-figure">
-            <img id="pipeline-image" src="images/pipeline-1.png" alt="">
+            <img id="pipeline-image" src="pipeline-1.png" alt="">
           </div>
         </div>
 
@@ -157,42 +157,42 @@
       label: 'Model',
       title: '1. Mechanistic Model',
       desc: 'The neuron is modeled with eight ionic currents (NaT, NaP, CaT, CaH, KDR, KM, KH) plus a leak current, each governed by a gating variable that relaxes toward a voltage-dependent steady state.',
-      img: 'images/pipeline-1.png',
+      img: 'pipeline-1.png',
       alt: 'Mechanistic model equations: membrane current balance and generic gating variable dynamics.'
     },
     {
       label: 'Optimization',
       title: '2. Global Optimization \u2192 Nominal Model',
       desc: 'Differential evolution fits the model\u2019s free parameters to representative voltage-clamp and current-clamp recordings, producing a \u201cnominal model\u201d that reproduces characteristic firing behavior.',
-      img: 'images/pipeline-2.png',
+      img: 'pipeline-2.png',
       alt: 'Global optimization via differential evolution produces a nominal model, shown as an action potential trace and a step response trace.'
     },
     {
       label: 'Sensitivity',
       title: '3. Sensitivity Analysis \u2192 Dimensionality Reduction',
       desc: 'Sobol indices quantify how strongly each conductance influences the model\u2019s output. Parameters below a significance threshold (marked \u2715) are dropped, shrinking the space the GAN needs to search.',
-      img: 'images/pipeline-3.png',
+      img: 'pipeline-3.png',
       alt: 'Bar chart of Sobol sensitivity indices for eight conductances, with three below-threshold parameters marked with an X.'
     },
     {
       label: 'Dataset',
       title: '4. Synthetic Dataset \u2192 Parameter\u2013Feature Pairs',
       desc: 'Sampling across the reduced parameter space and simulating the model produces a large synthetic dataset pairing parameters (P) with extracted trace features (F) \u2014 e.g. peak height, width, steady-state level.',
-      img: 'images/pipeline-4.png',
+      img: 'pipeline-4.png',
       alt: 'Voltage traces annotated with red feature markers for peak height, width, and steady-state level, used to build the parameter-feature dataset.'
     },
     {
       label: 'GAN',
       title: '5. Conditional GAN',
       desc: 'A conditional GAN trains on the synthetic (parameter, feature) pairs: the Generator proposes parameters given features, while the Discriminator learns to tell real pairs from generated ones \u2014 sharpening the Generator over time.',
-      img: 'images/pipeline-5.png',
+      img: 'pipeline-5.png',
       alt: 'Diagram of a conditional GAN with Generator and Discriminator networks exchanging real and generated parameter-feature pairs.'
     },
     {
       label: 'Inference',
       title: '6. Trained Generator \u2192 Real Data',
       desc: 'Real experimental traces are reduced to their features and passed to the trained Generator, which outputs a distribution of plausible parameters \u2014 capturing the altered excitability seen in Alzheimer\u2019s disease models.',
-      img: 'images/pipeline-6.png',
+      img: 'pipeline-6.png',
       alt: 'Real experimental data features feed into the trained Generator, producing an ensemble of inferred parameter traces.'
     }
   ];
