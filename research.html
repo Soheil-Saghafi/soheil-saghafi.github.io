@@ -89,7 +89,7 @@
           <p class="pipeline-step-title" id="pipeline-title"></p>
           <p class="pipeline-step-desc" id="pipeline-desc"></p>
           <div class="pipeline-equation" id="pipeline-equation" style="display:none;"></div>
-          <canvas id="pipeline-canvas" width="640" height="240"></canvas>
+          <canvas id="pipeline-canvas" width="700" height="280"></canvas>
         </div>
 
         <div class="pipeline-nav">
@@ -146,7 +146,13 @@
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
   const W = canvas.width, H = canvas.height;
-  const INK = '#1E2A22', MUTED = '#6B6F63', ACCENT = '#5B7052', ACCENT_DEEP = '#3C4E36', RULE = '#DAD5C7', DANGER = '#B0433D';
+  const INK = '#1E2A22', MUTED = '#6B6F63', ACCENT = '#5B7052', ACCENT_DEEP = '#3C4E36', RULE = '#DAD5C7', DANGER = '#B0433D', PAPER = '#F5F4EF', PAPER_RAISED = '#FCFBF8';
+
+  // ---- retina-sharp canvas setup ----
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = W * dpr;
+  canvas.height = H * dpr;
+  ctx.scale(dpr, dpr);
 
   const stepsEl = document.getElementById('pipeline-steps');
   const titleEl = document.getElementById('pipeline-title');
@@ -201,8 +207,8 @@
     STEPS.forEach((s, i) => {
       const dot = document.createElement('button');
       dot.type = 'button';
-      dot.className = 'pipeline-dot' + (i === current ? ' active' : '');
-      dot.innerHTML = '<span class="pipeline-dot-num">' + (i+1) + '</span><span class="pipeline-dot-label">' + s.label + '</span>';
+      dot.className = 'pipeline-dot' + (i === current ? ' active' : '') + (i < current ? ' done' : '');
+      dot.innerHTML = '<span class="pipeline-dot-num">' + (i < current ? '\u2713' : (i+1)) + '</span><span class="pipeline-dot-label">' + s.label + '</span>';
       dot.addEventListener('click', () => { current = i; update(); });
       stepsEl.appendChild(dot);
     });
@@ -212,10 +218,12 @@
     ctx.clearRect(0,0,W,H);
   }
 
-  function axisLabel(text, x, y, align) {
-    ctx.fillStyle = MUTED;
-    ctx.font = '11px IBM Plex Mono, monospace';
-    ctx.textAlign = align || 'left';
+  function label(text, x, y, opts) {
+    opts = opts || {};
+    ctx.fillStyle = opts.color || MUTED;
+    ctx.font = (opts.weight || '400') + ' ' + (opts.size || 11) + 'px ' + (opts.font || "'IBM Plex Mono', monospace");
+    ctx.textAlign = opts.align || 'left';
+    ctx.textBaseline = opts.baseline || 'alphabetic';
     ctx.fillText(text, x, y);
   }
 
@@ -223,17 +231,30 @@
     canvas.style.display = 'none';
     eqEl.style.display = 'block';
     eqEl.innerHTML =
-      'C &middot; dV/dt&nbsp; = &nbsp;I<sub>app</sub> &minus; I<sub>NaT</sub> &minus; I<sub>NaP</sub> &minus; I<sub>CaT</sub> &minus; I<sub>CaH</sub> &minus; I<sub>KDR</sub> &minus; I<sub>KM</sub> &minus; I<sub>L</sub> &minus; I<sub>KH</sub>' +
-      '<br><br>' +
-      'dx/dt&nbsp; = &nbsp;(x<sub>&infin;</sub> &minus; x) / &tau;<sub>x</sub> ,&nbsp; x &isin; {h<sub>NaT</sub>, m<sub>CaT</sub>, h<sub>CaT</sub>, m<sub>CaH</sub>, h<sub>CaH</sub>, m<sub>KDR</sub>, h<sub>KDR</sub>, m<sub>KM</sub>, m<sub>H</sub>, n<sub>H</sub>}';
+      '<div class="pipeline-eq-line">C &middot; dV/dt&nbsp; = &nbsp;I<sub>app</sub> &minus; I<sub>NaT</sub> &minus; I<sub>NaP</sub> &minus; I<sub>CaT</sub> &minus; I<sub>CaH</sub> &minus; I<sub>KDR</sub> &minus; I<sub>KM</sub> &minus; I<sub>L</sub> &minus; I<sub>KH</sub></div>' +
+      '<div class="pipeline-eq-line" style="margin-top:16px;">dx/dt&nbsp; = &nbsp;(x<sub>&infin;</sub> &minus; x) / &tau;<sub>x</sub></div>' +
+      '<div class="pipeline-eq-sub">x &isin; { h<sub>NaT</sub>, m<sub>CaT</sub>, h<sub>CaT</sub>, m<sub>CaH</sub>, h<sub>CaH</sub>, m<sub>KDR</sub>, h<sub>KDR</sub>, m<sub>KM</sub>, m<sub>H</sub>, n<sub>H</sub> }</div>';
   }
 
-  function plotAxes(x0, y0, w, h) {
+  // ---- shared chart frame with gridlines + ticks ----
+  function chartFrame(x0, y0, w, h, opts) {
+    opts = opts || {};
+    // horizontal gridlines
+    const rows = opts.rows || 4;
     ctx.strokeStyle = RULE;
     ctx.lineWidth = 1;
+    for (let r = 0; r <= rows; r++) {
+      const y = y0 + r*(h/rows);
+      ctx.beginPath();
+      ctx.moveTo(x0, y); ctx.lineTo(x0+w, y);
+      ctx.stroke();
+    }
+    // axes
+    ctx.strokeStyle = '#B9B3A2';
+    ctx.lineWidth = 1.2;
     ctx.beginPath();
     ctx.moveTo(x0, y0); ctx.lineTo(x0, y0+h);
-    ctx.moveTo(x0, y0+h); ctx.lineTo(x0+w, y0+h);
+    ctx.lineTo(x0+w, y0+h);
     ctx.stroke();
   }
 
@@ -241,65 +262,64 @@
     canvas.style.display = 'block';
     eqEl.style.display = 'none';
     clear();
-    const panelW = W/2 - 30, h = 150, y0 = 30;
+    const gap = 70;
+    const panelW = (W - 90 - gap)/2, h = 156, y0 = 56;
 
-    // Panel 1: spike
-    plotAxes(45, y0, panelW, h);
-    ctx.beginPath();
-    ctx.strokeStyle = ACCENT;
-    ctx.lineWidth = 2;
-    for (let i = 0; i <= 100; i++) {
-      const t = i/100;
-      const v = Math.exp(-Math.pow((t-0.35)*6,2)) * 1;
-      const x = 45 + t*panelW;
-      const yv = y0+h - v*(h-10);
-      if (i===0) ctx.moveTo(x,yv); else ctx.lineTo(x,yv);
+    function drawPanel(x0, curveFn, title, yTicks) {
+      chartFrame(x0, y0, panelW, h);
+      yTicks.forEach((t, i) => {
+        label(t, x0-8, y0 + i*(h/(yTicks.length-1)) + 3, {align:'right', size:10});
+      });
+      ctx.beginPath();
+      ctx.strokeStyle = ACCENT;
+      ctx.lineWidth = 2.2;
+      ctx.lineJoin = 'round';
+      for (let i = 0; i <= 120; i++) {
+        const t = i/120;
+        const v = curveFn(t);
+        const x = x0 + t*panelW;
+        const yv = y0+h - v*(h-8) - 4;
+        if (i===0) ctx.moveTo(x,yv); else ctx.lineTo(x,yv);
+      }
+      ctx.stroke();
+      label(title, x0, y0-18, {color: INK, weight: '600', size: 12, font: "'Inter', sans-serif"});
+      label('time \u2192', x0+panelW, y0+h+20, {align:'right', size: 10});
     }
-    ctx.stroke();
-    axisLabel('Voltage', 10, y0+h/2, 'left');
-    axisLabel('time', 45+panelW/2-12, y0+h+18);
-    axisLabel('Action potential', 45, y0-10);
 
-    // Panel 2: step response
-    const x2 = 45 + panelW + 60;
-    plotAxes(x2, y0, panelW, h);
-    ctx.beginPath();
-    ctx.strokeStyle = ACCENT;
-    ctx.lineWidth = 2;
-    for (let i = 0; i <= 100; i++) {
-      const t = i/100;
-      let v;
-      if (t < 0.15) v = 0.85;
-      else if (t < 0.25) v = 0.85 - (t-0.15)/0.10*0.75;
-      else v = 0.10 + (1-Math.exp(-(t-0.25)*8))*0.55;
-      const x = x2 + t*panelW;
-      const yv = y0+h - v*(h-10);
-      if (i===0) ctx.moveTo(x,yv); else ctx.lineTo(x,yv);
-    }
-    ctx.stroke();
-    axisLabel('time', x2+panelW/2-12, y0+h+18);
-    axisLabel('Step response', x2, y0-10);
+    drawPanel(50, t => Math.exp(-Math.pow((t-0.35)*6,2)), 'Action potential', ['40','0','-40','-80','-120']);
+    drawPanel(50+panelW+gap, t => {
+      if (t < 0.15) return 0.85;
+      if (t < 0.25) return 0.85 - (t-0.15)/0.10*0.75;
+      return 0.10 + (1-Math.exp(-(t-0.25)*8))*0.55;
+    }, 'Step response', ['40','0','-40','-80','-120']);
+
+    label('Voltage (mV)', 14, 18, {align:'left', size: 11});
   }
 
   const SOBOL_LABELS = ['gNaT','gNaP','gCaH','gL','gKDR','gKM','gCaT','gH'];
   const SOBOL_VALUES = [0.62, 0.06, 0.32, 0.08, 0.85, 0.28, 0.07, 0.45];
-  const SOBOL_EXCLUDE = [1, 3, 6]; // indices below threshold
+  const SOBOL_EXCLUDE = [1, 3, 6];
   const SOBOL_THRESHOLD = 0.15;
 
   function renderSensitivity() {
     canvas.style.display = 'block';
     eqEl.style.display = 'none';
     clear();
-    const x0 = 55, y0 = 20, w = W-90, h = 160;
-    plotAxes(x0, y0, w, h);
-    const n = SOBOL_LABELS.length;
-    const barW = w/n * 0.55;
-    const gap = w/n;
+    const x0 = 60, y0 = 30, w = W-100, h = 170;
+    chartFrame(x0, y0, w, h, {rows: 4});
 
-    // threshold dashed line
-    const threshY = y0 + h - SOBOL_THRESHOLD*(h-10);
-    ctx.setLineDash([4,3]);
+    ['1.0','0.75','0.5','0.25','0'].forEach((t,i) => {
+      label(t, x0-10, y0 + i*(h/4) + 3, {align:'right', size:10});
+    });
+
+    const n = SOBOL_LABELS.length;
+    const barW = w/n * 0.5;
+    const slot = w/n;
+
+    const threshY = y0 + h - SOBOL_THRESHOLD*h;
+    ctx.setLineDash([5,4]);
     ctx.strokeStyle = DANGER;
+    ctx.lineWidth = 1.3;
     ctx.beginPath();
     ctx.moveTo(x0, threshY); ctx.lineTo(x0+w, threshY);
     ctx.stroke();
@@ -307,101 +327,130 @@
 
     SOBOL_LABELS.forEach((lab, i) => {
       const val = SOBOL_VALUES[i];
-      const barH = val*(h-10);
-      const bx = x0 + i*gap + (gap-barW)/2;
+      const barH = val*h;
+      const bx = x0 + i*slot + (slot-barW)/2;
       const by = y0+h-barH;
-      ctx.fillStyle = SOBOL_EXCLUDE.includes(i) ? '#C9C2B3' : ACCENT;
-      ctx.fillRect(bx, by, barW, barH);
+      const excluded = SOBOL_EXCLUDE.includes(i);
 
-      ctx.fillStyle = MUTED;
-      ctx.font = '10px IBM Plex Mono, monospace';
-      ctx.textAlign = 'center';
-      ctx.fillText(lab, bx+barW/2, y0+h+14);
+      // subtle rounded top bar
+      ctx.fillStyle = excluded ? '#D8D2C2' : ACCENT;
+      roundRectTop(bx, by, barW, barH, 3);
+      ctx.fill();
 
-      if (SOBOL_EXCLUDE.includes(i)) {
-        ctx.fillStyle = DANGER;
-        ctx.font = 'bold 13px Inter, sans-serif';
-        ctx.fillText('\u2715', bx+barW/2, by-8);
+      label(lab, bx+barW/2, y0+h+16, {align:'center', size: 10.5});
+
+      if (excluded) {
+        label('\u2715', bx+barW/2, by-10, {align:'center', color: DANGER, size: 13, weight:'600', font:"'Inter', sans-serif"});
       }
     });
-    axisLabel('Sobol index', 10, y0+h/2, 'left');
+
+    const labelCx = x0 + (3+0.5)*slot; // above the short "gL" bar, clear of tall bars
+    label('threshold', labelCx, threshY-10, {align:'center', color: DANGER, size: 10});
+    label('Sobol index', 16, y0-14, {color: INK, weight:'600', size: 12, font: "'Inter', sans-serif"});
+  }
+
+  function roundRectTop(x,y,w,h,r) {
+    if (h < r) r = h;
+    ctx.beginPath();
+    ctx.moveTo(x, y+h);
+    ctx.lineTo(x, y+r);
+    ctx.arcTo(x, y, x+r, y, r);
+    ctx.lineTo(x+w-r, y);
+    ctx.arcTo(x+w, y, x+w, y+r, r);
+    ctx.lineTo(x+w, y+h);
+    ctx.closePath();
   }
 
   function renderFeatures() {
     canvas.style.display = 'block';
     eqEl.style.display = 'none';
     clear();
-    const panelW = W/2 - 30, h = 150, y0 = 30;
+    const gap = 70;
+    const panelW = (W-90-gap)/2, h = 156, y0 = 56;
 
-    // Panel 1: spike w/ features
-    plotAxes(45, y0, panelW, h);
-    const pts = [];
-    ctx.beginPath();
-    ctx.strokeStyle = ACCENT_DEEP;
-    ctx.lineWidth = 2;
-    for (let i = 0; i <= 100; i++) {
-      const t = i/100;
-      const v = Math.exp(-Math.pow((t-0.35)*6,2));
-      const x = 45 + t*panelW;
-      const yv = y0+h - v*(h-10);
-      if (i===0) ctx.moveTo(x,yv); else ctx.lineTo(x,yv);
-      if (i===15 || i===35 || i===55) pts.push([x,yv]);
-    }
-    ctx.stroke();
-    pts.forEach(p => {
+    function drawPanel(x0, curveFn, markerIdxs, title) {
+      chartFrame(x0, y0, panelW, h);
+      const pts = [];
       ctx.beginPath();
-      ctx.fillStyle = '#C0524A';
-      ctx.arc(p[0], p[1], 4, 0, Math.PI*2);
-      ctx.fill();
-    });
-    axisLabel('time', 45+panelW/2-12, y0+h+18);
-    axisLabel('Peak height & width', 45, y0-10);
+      ctx.strokeStyle = ACCENT_DEEP;
+      ctx.lineWidth = 2.2;
+      for (let i = 0; i <= 120; i++) {
+        const t = i/120;
+        const v = curveFn(t);
+        const x = x0 + t*panelW;
+        const yv = y0+h - v*(h-8) - 4;
+        if (i===0) ctx.moveTo(x,yv); else ctx.lineTo(x,yv);
+        if (markerIdxs.includes(i)) pts.push([x,yv]);
+      }
+      ctx.stroke();
+      pts.forEach(p => {
+        ctx.beginPath();
+        ctx.fillStyle = '#FFFFFF';
+        ctx.arc(p[0], p[1], 5, 0, Math.PI*2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.fillStyle = '#C0524A';
+        ctx.arc(p[0], p[1], 4, 0, Math.PI*2);
+        ctx.fill();
+      });
+      label(title, x0, y0-18, {color: INK, weight: '600', size: 12, font: "'Inter', sans-serif"});
+      label('time \u2192', x0+panelW, y0+h+20, {align:'right', size: 10});
+    }
 
-    // Panel 2: step response w/ features
-    const x2 = 45 + panelW + 60;
-    plotAxes(x2, y0, panelW, h);
-    const pts2 = [];
-    ctx.beginPath();
-    ctx.strokeStyle = ACCENT_DEEP;
-    ctx.lineWidth = 2;
-    for (let i = 0; i <= 100; i++) {
-      const t = i/100;
-      let v;
-      if (t < 0.15) v = 0.85;
-      else if (t < 0.25) v = 0.85 - (t-0.15)/0.10*0.75;
-      else v = 0.10 + (1-Math.exp(-(t-0.25)*8))*0.55;
-      const x = x2 + t*panelW;
-      const yv = y0+h - v*(h-10);
-      if (i===0) ctx.moveTo(x,yv); else ctx.lineTo(x,yv);
-      if (i===14 || i===24 || i===70) pts2.push([x,yv]);
-    }
-    ctx.stroke();
-    pts2.forEach(p => {
-      ctx.beginPath();
-      ctx.fillStyle = '#C0524A';
-      ctx.arc(p[0], p[1], 4, 0, Math.PI*2);
-      ctx.fill();
-    });
-    axisLabel('time', x2+panelW/2-12, y0+h+18);
-    axisLabel('Drop & recovery level', x2, y0-10);
+    drawPanel(50, t => Math.exp(-Math.pow((t-0.35)*6,2)), [18,42,66], 'Peak height & width');
+    drawPanel(50+panelW+gap, t => {
+      if (t < 0.15) return 0.85;
+      if (t < 0.25) return 0.85 - (t-0.15)/0.10*0.75;
+      return 0.10 + (1-Math.exp(-(t-0.25)*8))*0.55;
+    }, [17,29,84], 'Drop & recovery level');
+
+    label('Voltage', 14, 18, {align:'left', size: 11});
   }
 
-  function box(x,y,w,h,label,fill) {
-    ctx.strokeStyle = ACCENT_DEEP;
-    ctx.lineWidth = 1.5;
-    ctx.fillStyle = fill || 'rgba(91,112,82,0.08)';
-    ctx.fillRect(x,y,w,h);
-    ctx.strokeRect(x,y,w,h);
+  // ---- diagram primitives ----
+  function roundRect(x,y,w,h,r) {
+    ctx.beginPath();
+    ctx.moveTo(x+r,y);
+    ctx.arcTo(x+w,y,x+w,y+h,r);
+    ctx.arcTo(x+w,y+h,x,y+h,r);
+    ctx.arcTo(x,y+h,x,y,r);
+    ctx.arcTo(x,y,x+w,y,r);
+    ctx.closePath();
+  }
+
+  function box(x,y,w,h,text,opts) {
+    opts = opts || {};
+    ctx.save();
+    ctx.shadowColor = 'rgba(30,42,34,0.12)';
+    ctx.shadowBlur = 6;
+    ctx.shadowOffsetY = 2;
+    ctx.fillStyle = opts.fill || PAPER_RAISED;
+    roundRect(x,y,w,h,8);
+    ctx.fill();
+    ctx.restore();
+
+    ctx.strokeStyle = opts.stroke || ACCENT_DEEP;
+    ctx.lineWidth = 1.4;
+    roundRect(x,y,w,h,8);
+    ctx.stroke();
+
     ctx.fillStyle = INK;
-    ctx.font = '12px Inter, sans-serif';
+    ctx.font = (opts.weight || '600') + ' 13px Inter, sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText(label, x+w/2, y+h/2+4);
+    ctx.textBaseline = 'middle';
+    // support two-line labels split on \n
+    const lines = String(text).split('\n');
+    const lh = 15;
+    const startY = y+h/2 - (lines.length-1)*lh/2;
+    lines.forEach((ln,i) => ctx.fillText(ln, x+w/2, startY + i*lh));
+    ctx.textBaseline = 'alphabetic';
   }
 
-  function arrow(x1,y1,x2,y2,dashed) {
-    ctx.strokeStyle = MUTED;
-    ctx.lineWidth = 1.5;
-    if (dashed) ctx.setLineDash([4,3]); else ctx.setLineDash([]);
+  function arrow(x1,y1,x2,y2,opts) {
+    opts = opts || {};
+    ctx.strokeStyle = opts.color || '#9AA08E';
+    ctx.lineWidth = opts.width || 1.6;
+    if (opts.dashed) ctx.setLineDash([5,4]); else ctx.setLineDash([]);
     ctx.beginPath();
     ctx.moveTo(x1,y1); ctx.lineTo(x2,y2);
     ctx.stroke();
@@ -409,10 +458,10 @@
     const angle = Math.atan2(y2-y1, x2-x1);
     ctx.beginPath();
     ctx.moveTo(x2,y2);
-    ctx.lineTo(x2-8*Math.cos(angle-0.4), y2-8*Math.sin(angle-0.4));
-    ctx.lineTo(x2-8*Math.cos(angle+0.4), y2-8*Math.sin(angle+0.4));
+    ctx.lineTo(x2-9*Math.cos(angle-0.35), y2-9*Math.sin(angle-0.35));
+    ctx.lineTo(x2-9*Math.cos(angle+0.35), y2-9*Math.sin(angle+0.35));
     ctx.closePath();
-    ctx.fillStyle = MUTED;
+    ctx.fillStyle = opts.color || '#9AA08E';
     ctx.fill();
   }
 
@@ -420,60 +469,55 @@
     canvas.style.display = 'block';
     eqEl.style.display = 'none';
     clear();
-    ctx.textAlign = 'left';
-    ctx.fillStyle = INK;
-    ctx.font = '13px Inter, sans-serif';
-    ctx.fillText('[P\u1D63, F]', 40, 60);
-    arrow(90, 55, 220, 55);
-    box(230, 30, 140, 50, 'Discriminator');
-    box(230, 140, 140, 50, 'Generator');
-    arrow(300, 140, 300, 90, true);
-    arrow(300, 90, 300, 30, false);
-    ctx.fillStyle = INK;
-    ctx.font = '13px Inter, sans-serif';
-    ctx.textAlign = 'left';
-    ctx.fillText('P\u1D4D | F', 380, 170);
-    arrow(370, 165, 500, 165);
 
-    ctx.fillStyle = MUTED;
-    ctx.font = '11px IBM Plex Mono, monospace';
-    ctx.fillText('real vs. generated', 240, 100);
+    const cx = W/2;
+    label('[P\u1D63, F]', 50, 46, {color: INK, size: 13, font: "'Inter', sans-serif", weight:'600'});
+    arrow(112, 42, 250, 42, {color: MUTED});
+
+    box(260, 18, 170, 52, 'Discriminator');
+    box(260, 152, 170, 52, 'Generator', {fill: 'rgba(91,112,82,0.10)'});
+
+    arrow(345, 152, 345, 78, {dashed:true, color: MUTED});
+    label('feedback', 358, 118, {size: 9.5, color: MUTED});
+    arrow(345, 70, 345, 18, {color: MUTED});
+    label('real vs. generated', 345, 108, {align:'center', size: 9.5, color: MUTED});
+
+    label('P\u1D4D | F', 480, 182, {color: INK, size: 13, font: "'Inter', sans-serif", weight:'600'});
+    arrow(430, 178, 470, 178, {color: MUTED});
   }
 
   function renderInference() {
     canvas.style.display = 'block';
     eqEl.style.display = 'none';
     clear();
-    box(20, 90, 110, 44, 'Real Data');
-    arrow(75, 90, 75, 45);
-    ctx.fillStyle = INK;
-    ctx.font = '13px Inter, sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText('F\u1D63', 75, 35);
-    arrow(130, 30, 220, 30);
-    box(230, 10, 150, 44, 'Trained Generator');
-    arrow(305, 54, 305, 90);
-    ctx.fillText('P\u1D4D | F\u1D63', 305, 108);
 
-    // ensemble of traces on the right
-    const x0 = 420, y0 = 30, w = 200, h = 150;
-    plotAxes(x0, y0, w, h);
-    for (let e = 0; e < 12; e++) {
+    box(20, 100, 120, 48, 'Real Data');
+    arrow(80, 100, 80, 50, {color: MUTED});
+    label('F\u1D63', 80, 38, {align:'center', color: INK, size: 12.5, weight:'600', font:"'Inter', sans-serif"});
+
+    arrow(148, 32, 250, 32, {color: MUTED});
+    box(260, 8, 170, 48, 'Trained\nGenerator');
+    arrow(345, 56, 345, 100, {color: MUTED});
+    label('P\u1D4D | F\u1D63', 345, 122, {align:'center', color: INK, size: 12.5, weight:'600', font:"'Inter', sans-serif"});
+
+    const x0 = 470, y0 = 40, w = 190, h = 160;
+    chartFrame(x0, y0, w, h, {rows: 3});
+    for (let e = 0; e < 14; e++) {
       const jitter = (Math.random()-0.5)*0.15;
       const shift = (Math.random()-0.5)*0.08;
       ctx.beginPath();
-      ctx.strokeStyle = 'rgba(107,111,99,0.35)';
-      ctx.lineWidth = 1;
-      for (let i = 0; i <= 60; i++) {
-        const t = i/60;
+      ctx.strokeStyle = 'rgba(60,78,54,0.28)';
+      ctx.lineWidth = 1.1;
+      for (let i = 0; i <= 70; i++) {
+        const t = i/70;
         const v = Math.exp(-Math.pow((t-0.35-shift)*6,2))*(1+jitter);
         const x = x0 + t*w;
-        const yv = y0+h - v*(h-10);
+        const yv = y0+h - v*(h-8) - 4;
         if (i===0) ctx.moveTo(x,yv); else ctx.lineTo(x,yv);
       }
       ctx.stroke();
     }
-    axisLabel('Inferred parameter ensemble', x0, y0-8);
+    label('Inferred parameter ensemble', x0, y0-16, {color: INK, weight:'600', size: 12, font: "'Inter', sans-serif"});
   }
 
   function update() {
