@@ -294,52 +294,80 @@ ul.entry-desc li:last-child { margin-bottom: 0; }
 }
 .research-area p { margin: 0 0 12px; }
 
-/* ---------- HH neuron demo ---------- */
-.hh-demo {
+/* ---------- pipeline walkthrough demo ---------- */
+.pipeline-demo {
   background: var(--paper-raised);
   border: 1px solid var(--rule);
   border-radius: 6px;
   padding: 20px;
   margin-top: 18px;
 }
-.hh-controls {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 14px 24px;
-  margin-bottom: 14px;
+.pipeline-steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 18px;
 }
-.hh-control label {
-  display: block;
-  font-size: 0.82rem;
-  color: var(--muted);
-  margin-bottom: 4px;
-}
-.hh-control .hh-unit {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.76rem;
-}
-.hh-control input[type="range"] {
-  width: 100%;
-  accent-color: var(--accent);
-  vertical-align: middle;
-}
-.hh-value {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.8rem;
-  color: var(--accent-deep);
-  margin-left: 8px;
-}
-.hh-checkbox {
+.pipeline-dot {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 0.85rem;
+  gap: 6px;
+  background: transparent;
+  border: 1px solid var(--rule);
+  border-radius: 20px;
+  padding: 5px 12px 5px 6px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.78rem;
   color: var(--muted);
-  margin-bottom: 14px;
   cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
 }
-.hh-checkbox input { accent-color: var(--accent); }
-#hh-canvas {
+.pipeline-dot:hover { border-color: var(--accent); }
+.pipeline-dot.active {
+  border-color: var(--accent);
+  color: var(--ink);
+  font-weight: 600;
+}
+.pipeline-dot-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--rule);
+  color: var(--ink);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.7rem;
+}
+.pipeline-dot.active .pipeline-dot-num {
+  background: var(--accent);
+  color: #fff;
+}
+.pipeline-panel { min-height: 60px; }
+.pipeline-step-title {
+  font-family: 'Source Serif 4', serif;
+  font-weight: 600;
+  font-size: 1.05rem;
+  margin: 0 0 6px;
+}
+.pipeline-step-desc {
+  font-size: 0.9rem;
+  color: var(--muted);
+  margin: 0 0 14px;
+  max-width: 60ch;
+}
+.pipeline-equation {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.88rem;
+  color: var(--ink);
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  padding: 20px;
+  line-height: 1.9;
+}
+#pipeline-canvas {
   width: 100%;
   height: auto;
   background: var(--paper);
@@ -347,13 +375,27 @@ ul.entry-desc li:last-child { margin-bottom: 0; }
   border-radius: 4px;
   display: block;
 }
-.hh-caption {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.76rem;
-  color: var(--muted);
-  margin: 8px 0 0;
+.pipeline-nav {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 14px;
+}
+.pipeline-nav button {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.82rem;
+  color: var(--accent-deep);
+  background: transparent;
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  padding: 6px 14px;
+  cursor: pointer;
+}
+.pipeline-nav button:hover:not(:disabled) { border-color: var(--accent); }
+.pipeline-nav button:disabled {
+  opacity: 0.35;
+  cursor: default;
 }
 
 @media (max-width: 560px) {
-  .hh-controls { grid-template-columns: 1fr; }
+  .pipeline-dot-label { display: none; }
 }
