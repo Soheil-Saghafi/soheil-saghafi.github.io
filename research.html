@@ -242,8 +242,6 @@
 
   function clear() { ctx.clearRect(0,0,W,H); }
 
-  // Traced from the actual figure: flat baseline, sharp drop, low plateau,
-  // then a sharp rebound that slightly overshoots baseline before settling.
   function stepResponseCurve(t) {
     if (t < 0.105) return 0.542;
     if (t < 0.164) {
@@ -497,9 +495,6 @@
     ctx.fill();
   }
 
-  // Discriminator and Generator stacked vertically (as in the source figure);
-  // the input pair splits to both networks, the Generator's output flows
-  // right, and a single labeled dashed arrow shows the adversarial feedback.
   function renderGAN() {
     canvas.style.display = 'block';
     eqEl.style.display = 'none';
@@ -536,15 +531,11 @@
     label('Conditional GAN training loop', discX, discY-14, {color: INK, weight:'600', size: 12, font: "'Inter', sans-serif"});
   }
 
-  // Real Data feeds its features up into the Trained Generator (left);
-  // a divider separates the process from the results: two ticked panels
-  // showing the resulting ensembles of inferred parameter traces (right).
   function renderInference() {
     canvas.style.display = 'block';
     eqEl.style.display = 'none';
     clear();
 
-    // ---- left: process diagram ----
     const genW = 175, genH = 62, genX = 95, genY = 46;
     const dataW = 160, dataH = 52;
     const genCx = genX + genW/2;
@@ -563,7 +554,6 @@
 
     label('Inference at test time', genX-45, 22, {color: INK, weight:'600', size: 12, font: "'Inter', sans-serif"});
 
-    // ---- divider ----
     const dividerX = 335;
     ctx.strokeStyle = RULE;
     ctx.lineWidth = 1;
@@ -571,7 +561,6 @@
     ctx.moveTo(dividerX, 20); ctx.lineTo(dividerX, 300);
     ctx.stroke();
 
-    // ---- right: two ticked ensemble panels ----
     label('Inferred Parameter Ensembles', dividerX+26, 22, {color: INK, weight:'600', size: 12, font: "'Inter', sans-serif"});
 
     const gap = 34;
