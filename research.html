@@ -155,6 +155,61 @@
             </div>
           </div>
         </details>
+
+        <details class="ra-project">
+          <summary class="ra-project-summary">
+            <span class="ra-project-title">Modeling Metabolic State Transitions in Obesity Using a Time-Varying Lambda&ndash;Omega Framework</span>
+            <span class="ra-project-chevron" aria-hidden="true"></span>
+          </summary>
+          <div class="ra-project-body">
+            <p>
+              In
+              <a href="https://arxiv.org/abs/2603.06819" target="_blank" rel="noopener">Modeling Metabolic State Transitions in Obesity Using a Time-Varying Lambda&ndash;Omega Framework</a>
+              (Saghafi &amp; Clifford, 2026), we introduce a dynamical-systems account of metabolic
+              adaptation &mdash; the body's tendency to fight back against weight loss far more strongly
+              than it resists weight gain. Rather than treating body-weight regulation as a static
+              energy-balance equation, we model it with a classical &lambda;&ndash;&omega; oscillator whose
+              stability parameters are allowed to drift slowly over time, letting the model represent a
+              gradual reshaping of the body's regulatory landscape rather than a fixed attractor.
+            </p>
+            <p>
+              As the nullclines of the system deform smoothly, the model reproduces three
+              physiologically meaningful regimes: a slow transition from an unstable to a stable fixed
+              point that produces a plateau in oscillation amplitude &mdash; the model's analogue of the
+              stubborn <em>metabolic adaptation</em> plateau seen in real weight-loss data; a
+              slowly <strong>growing</strong> limit cycle that captures the gradual, easy-to-miss creep of
+              chronic overfeeding; and a slowly <strong>shrinking</strong> limit cycle that captures durable,
+              well-paced weight loss. The three animations below show these three cases side by side.
+            </p>
+
+            <div class="ra-figure">
+              <div class="ra-video-row">
+                <div class="ra-video-item">
+                  <video controls loop muted playsinline preload="metadata">
+                    <source src="lambda-omega-case1.mp4" type="video/mp4">
+                  </video>
+                  <p class="ra-video-label">Case 1 &middot; Metabolic adaptation</p>
+                  <p class="ra-video-caption">A smooth nullcline shift slowly converts an unstable fixed point into a stable one. Oscillation amplitude stays nearly constant during the transition, then collapses &mdash; the model's plateau.</p>
+                </div>
+                <div class="ra-video-item">
+                  <video controls loop muted playsinline preload="metadata">
+                    <source src="lambda-omega-case2.mp4" type="video/mp4">
+                  </video>
+                  <p class="ra-video-label">Case 2 &middot; Overfeeding</p>
+                  <p class="ra-video-caption">The fixed point stays unstable while the limit cycle itself grows, representing the slow, largely unnoticed drift of sustained caloric surplus into a larger-amplitude metabolic state.</p>
+                </div>
+                <div class="ra-video-item">
+                  <video controls loop muted playsinline preload="metadata">
+                    <source src="lambda-omega-case3.mp4" type="video/mp4">
+                  </video>
+                  <p class="ra-video-label">Case 3 &middot; Weight loss</p>
+                  <p class="ra-video-caption">&Lambda;(r,t) becomes progressively more negative, and the limit cycle contracts cycle by cycle &mdash; a gradual, sustainable collapse toward a smaller metabolic steady state.</p>
+                </div>
+              </div>
+              <p class="ra-figure-caption">Three regimes of the time-varying &lambda;&ndash;&omega; model, driven purely by a slow deformation of the system's nullclines &mdash; no discrete switch is imposed.</p>
+            </div>
+          </div>
+        </details>
       </div>
     </details>
 
