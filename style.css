@@ -375,48 +375,89 @@ ul.entry-desc li:last-child { margin-bottom: 0; }
 .ra-body p:last-child { margin-bottom: 0; }
 
 .ra-project {
-  border-top: 1px solid var(--rule);
+  border: 1px solid var(--rule);
+  border-radius: 7px;
+  background: var(--paper);
+  margin-top: 14px;
+  overflow: hidden;
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
 .ra-project:first-child {
-  border-top: none;
+  margin-top: 0;
+}
+.ra-project:hover {
+  border-color: #C7C0AD;
+  box-shadow: 0 1px 2px rgba(30,42,34,0.05), 0 4px 12px rgba(30,42,34,0.04);
+}
+.ra-project[open] {
+  border-color: rgba(91,112,82,0.4);
 }
 .ra-project-summary {
   list-style: none;
   cursor: pointer;
-  padding: 20px 40px 20px 0;
+  padding: 17px 58px 17px 20px;
   position: relative;
-  display: block;
-  transition: opacity 0.15s;
+  display: flex;
+  align-items: center;
+  min-height: 24px;
+  transition: background 0.15s;
 }
 .ra-project-summary::-webkit-details-marker { display: none; }
-.ra-project-summary:hover { opacity: 0.75; }
+.ra-project-summary:hover { background: rgba(91,112,82,0.045); }
 .ra-project-summary:focus-visible {
   outline: 2px solid var(--accent);
-  outline-offset: 2px;
+  outline-offset: -2px;
+}
+.ra-project[open] .ra-project-summary {
+  background: rgba(91,112,82,0.045);
+  border-bottom: 1px solid var(--rule);
 }
 .ra-project-title {
   font-family: 'Source Serif 4', serif;
   font-weight: 600;
   font-size: 1.02rem;
   color: var(--ink);
+  line-height: 1.4;
 }
 .ra-project-chevron {
   position: absolute;
-  top: 24px;
-  right: 4px;
-  width: 9px;
-  height: 9px;
+  top: 50%;
+  right: 16px;
+  transform: translateY(-50%);
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 1px solid var(--rule);
+  background: var(--paper-raised);
+  transition: transform 0.2s, border-color 0.2s, background 0.2s;
+  flex: none;
+}
+.ra-project-chevron::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 7px;
+  height: 7px;
   border-right: 2px solid var(--muted);
   border-bottom: 2px solid var(--muted);
-  transform: rotate(-45deg);
-  transition: transform 0.2s;
+  transform: translate(-65%, -50%) rotate(-45deg);
+  transition: border-color 0.2s;
 }
+.ra-project:hover .ra-project-chevron { border-color: var(--accent); }
 .ra-project[open] .ra-project-chevron {
-  transform: rotate(45deg);
-  border-color: var(--accent-deep);
+  transform: translateY(-50%) rotate(90deg);
+  background: var(--accent);
+  border-color: var(--accent);
+}
+.ra-project[open] .ra-project-chevron::before {
+  border-color: #fff;
 }
 .ra-project-body {
-  padding: 0 0 24px;
+  padding: 20px 20px 22px;
+}
+.ra-project-body p:first-child {
+  margin-top: 0;
 }
 .ra-figure {
   margin-top: 16px;
