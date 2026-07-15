@@ -75,44 +75,27 @@
         altered excitability seen in Alzheimer's disease mouse models.
       </p>
       <p>
-        The widget below is a live version of that underlying biophysical model.
-        Adjust the conductances the same way the GAN searches over them, and
-        watch how the simulated neuron's firing pattern changes &mdash; then
-        toggle the baseline comparison to see the kind of shift in excitability
-        our inference method is designed to detect.
+        The widget below walks through that six-step pipeline &mdash; from the
+        mechanistic model, through parameter fitting and sensitivity-based
+        dimensionality reduction, to building a synthetic training set and
+        training the conditional GAN that ultimately infers parameters from
+        real experimental recordings.
       </p>
 
-      <div class="hh-demo" id="hh-demo">
-        <div class="hh-controls">
-          <div class="hh-control">
-            <label for="hh-gna">Sodium conductance <span class="hh-unit">g<sub>Na</sub> (mS/cm&sup2;)</span></label>
-            <input type="range" id="hh-gna" min="20" max="160" step="1" value="120">
-            <span class="hh-value" id="hh-gna-val">120</span>
-          </div>
-          <div class="hh-control">
-            <label for="hh-gk">Potassium conductance <span class="hh-unit">g<sub>K</sub> (mS/cm&sup2;)</span></label>
-            <input type="range" id="hh-gk" min="5" max="60" step="1" value="36">
-            <span class="hh-value" id="hh-gk-val">36</span>
-          </div>
-          <div class="hh-control">
-            <label for="hh-gl">Leak conductance <span class="hh-unit">g<sub>L</sub> (mS/cm&sup2;)</span></label>
-            <input type="range" id="hh-gl" min="0.05" max="1.5" step="0.05" value="0.3">
-            <span class="hh-value" id="hh-gl-val">0.30</span>
-          </div>
-          <div class="hh-control">
-            <label for="hh-iapp">Applied current <span class="hh-unit">I<sub>app</sub> (&micro;A/cm&sup2;)</span></label>
-            <input type="range" id="hh-iapp" min="0" max="30" step="0.5" value="10">
-            <span class="hh-value" id="hh-iapp-val">10.0</span>
-          </div>
+      <div class="pipeline-demo" id="pipeline-demo">
+        <div class="pipeline-steps" id="pipeline-steps"></div>
+
+        <div class="pipeline-panel">
+          <p class="pipeline-step-title" id="pipeline-title"></p>
+          <p class="pipeline-step-desc" id="pipeline-desc"></p>
+          <div class="pipeline-equation" id="pipeline-equation" style="display:none;"></div>
+          <canvas id="pipeline-canvas" width="640" height="240"></canvas>
         </div>
 
-        <label class="hh-checkbox">
-          <input type="checkbox" id="hh-baseline">
-          Compare to healthy baseline (g<sub>Na</sub>=120, g<sub>K</sub>=36, g<sub>L</sub>=0.3, I<sub>app</sub>=10)
-        </label>
-
-        <canvas id="hh-canvas" width="640" height="260"></canvas>
-        <p class="hh-caption">Simulated membrane voltage over 60&nbsp;ms &middot; sage = current settings<span id="hh-baseline-legend"></span></p>
+        <div class="pipeline-nav">
+          <button type="button" id="pipeline-prev">&larr; Previous</button>
+          <button type="button" id="pipeline-next">Next &rarr;</button>
+        </div>
       </div>
     </div>
 
@@ -145,7 +128,7 @@
 
 <footer class="site-footer">
   <div class="footer-wrap">
-    <span>&copy; <span id="year"></span> [Your Name]</span>
+    <span>&copy; <span id="year"></span> Soheil Saghafi</span>
     <span class="footer-links">
       <a href="mailto:soheil.saghafi@emory.edu">Email</a>
       <a href="https://scholar.google.com/citations?user=a5TkFIcAAAAJ&hl=en" target="_blank" rel="noopener">Google Scholar</a>
@@ -159,132 +142,354 @@
 
 <script>
 (function() {
-  const canvas = document.getElementById('hh-canvas');
+  const canvas = document.getElementById('pipeline-canvas');
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
   const W = canvas.width, H = canvas.height;
+  const INK = '#1E2A22', MUTED = '#6B6F63', ACCENT = '#5B7052', ACCENT_DEEP = '#3C4E36', RULE = '#DAD5C7', DANGER = '#B0433D';
 
-  const gnaSlider = document.getElementById('hh-gna');
-  const gkSlider  = document.getElementById('hh-gk');
-  const glSlider  = document.getElementById('hh-gl');
-  const iappSlider = document.getElementById('hh-iapp');
-  const baselineCheckbox = document.getElementById('hh-baseline');
-  const legend = document.getElementById('hh-baseline-legend');
+  const stepsEl = document.getElementById('pipeline-steps');
+  const titleEl = document.getElementById('pipeline-title');
+  const descEl = document.getElementById('pipeline-desc');
+  const eqEl = document.getElementById('pipeline-equation');
+  const prevBtn = document.getElementById('pipeline-prev');
+  const nextBtn = document.getElementById('pipeline-next');
 
-  const vals = {
-    gna: document.getElementById('hh-gna-val'),
-    gk: document.getElementById('hh-gk-val'),
-    gl: document.getElementById('hh-gl-val'),
-    iapp: document.getElementById('hh-iapp-val')
-  };
-
-  const ENA = 50, EK = -77, EL = -54.387, C = 1;
-  const BASELINE = { gna: 120, gk: 36, gl: 0.3, iapp: 10 };
-
-  function rates(V) {
-    const am = (V === -40) ? 1 : 0.1*(V+40)/(1-Math.exp(-(V+40)/10));
-    const bm = 4*Math.exp(-(V+65)/18);
-    const ah = 0.07*Math.exp(-(V+65)/20);
-    const bh = 1/(1+Math.exp(-(V+35)/10));
-    const an = (V === -55) ? 0.1 : 0.01*(V+55)/(1-Math.exp(-(V+55)/10));
-    const bn = 0.125*Math.exp(-(V+65)/80);
-    return {am, bm, ah, bh, an, bn};
-  }
-
-  function simulate(params) {
-    const dt = 0.01, T = 60;
-    const steps = Math.round(T/dt);
-    let V = -65;
-    let r0 = rates(V);
-    let m = r0.am/(r0.am+r0.bm), h = r0.ah/(r0.ah+r0.bh), n = r0.an/(r0.an+r0.bn);
-    const trace = new Float32Array(steps);
-    for (let i = 0; i < steps; i++) {
-      const r = rates(V);
-      const dm = r.am*(1-m) - r.bm*m;
-      const dh = r.ah*(1-h) - r.bh*h;
-      const dn = r.an*(1-n) - r.bn*n;
-      const iNa = params.gna * m*m*m * h * (V-ENA);
-      const iK  = params.gk * n*n*n*n * (V-EK);
-      const iL  = params.gl * (V-EL);
-      const dV = (params.iapp - iNa - iK - iL) / C;
-      V += dV*dt; m += dm*dt; h += dh*dt; n += dn*dt;
-      trace[i] = V;
+  const STEPS = [
+    {
+      label: 'Model',
+      title: '1. Mechanistic Model',
+      desc: 'The neuron is modeled with eight ionic currents (NaT, NaP, CaT, CaH, KDR, KM, KH) plus a leak current, each governed by a gating variable that relaxes toward a voltage-dependent steady state.',
+      render: renderEquation
+    },
+    {
+      label: 'Optimization',
+      title: '2. Global Optimization \u2192 Nominal Model',
+      desc: 'Differential evolution fits the model\u2019s free parameters to representative voltage-clamp and current-clamp recordings, producing a \u201cnominal model\u201d that reproduces characteristic firing behavior.',
+      render: renderNominal
+    },
+    {
+      label: 'Sensitivity',
+      title: '3. Sensitivity Analysis \u2192 Dimensionality Reduction',
+      desc: 'Sobol indices quantify how strongly each conductance influences the model\u2019s output. Parameters below a significance threshold (marked \u2715) are dropped, shrinking the space the GAN needs to search.',
+      render: renderSensitivity
+    },
+    {
+      label: 'Dataset',
+      title: '4. Synthetic Dataset \u2192 Parameter\u2013Feature Pairs',
+      desc: 'Sampling across the reduced parameter space and simulating the model produces a large synthetic dataset pairing parameters (P) with extracted trace features (F) \u2014 e.g. peak height, width, steady-state level.',
+      render: renderFeatures
+    },
+    {
+      label: 'GAN',
+      title: '5. Conditional GAN',
+      desc: 'A conditional GAN trains on the synthetic (parameter, feature) pairs: the Generator proposes parameters given features, while the Discriminator learns to tell real pairs from generated ones \u2014 sharpening the Generator over time.',
+      render: renderGAN
+    },
+    {
+      label: 'Inference',
+      title: '6. Trained Generator \u2192 Real Data',
+      desc: 'Real experimental traces are reduced to their features and passed to the trained Generator, which outputs a distribution of plausible parameters \u2014 capturing the altered excitability seen in Alzheimer\u2019s disease models.',
+      render: renderInference
     }
-    return trace;
+  ];
+
+  let current = 0;
+
+  function buildStepper() {
+    stepsEl.innerHTML = '';
+    STEPS.forEach((s, i) => {
+      const dot = document.createElement('button');
+      dot.type = 'button';
+      dot.className = 'pipeline-dot' + (i === current ? ' active' : '');
+      dot.innerHTML = '<span class="pipeline-dot-num">' + (i+1) + '</span><span class="pipeline-dot-label">' + s.label + '</span>';
+      dot.addEventListener('click', () => { current = i; update(); });
+      stepsEl.appendChild(dot);
+    });
   }
 
-  function drawAxes() {
-    ctx.strokeStyle = '#DAD5C7';
+  function clear() {
+    ctx.clearRect(0,0,W,H);
+  }
+
+  function axisLabel(text, x, y, align) {
+    ctx.fillStyle = MUTED;
+    ctx.font = '11px IBM Plex Mono, monospace';
+    ctx.textAlign = align || 'left';
+    ctx.fillText(text, x, y);
+  }
+
+  function renderEquation() {
+    canvas.style.display = 'none';
+    eqEl.style.display = 'block';
+    eqEl.innerHTML =
+      'C &middot; dV/dt&nbsp; = &nbsp;I<sub>app</sub> &minus; I<sub>NaT</sub> &minus; I<sub>NaP</sub> &minus; I<sub>CaT</sub> &minus; I<sub>CaH</sub> &minus; I<sub>KDR</sub> &minus; I<sub>KM</sub> &minus; I<sub>L</sub> &minus; I<sub>KH</sub>' +
+      '<br><br>' +
+      'dx/dt&nbsp; = &nbsp;(x<sub>&infin;</sub> &minus; x) / &tau;<sub>x</sub> ,&nbsp; x &isin; {h<sub>NaT</sub>, m<sub>CaT</sub>, h<sub>CaT</sub>, m<sub>CaH</sub>, h<sub>CaH</sub>, m<sub>KDR</sub>, h<sub>KDR</sub>, m<sub>KM</sub>, m<sub>H</sub>, n<sub>H</sub>}';
+  }
+
+  function plotAxes(x0, y0, w, h) {
+    ctx.strokeStyle = RULE;
     ctx.lineWidth = 1;
     ctx.beginPath();
-    for (let gy = 0; gy <= 4; gy++) {
-      const y = 20 + gy*(H-50)/4;
-      ctx.moveTo(50, y); ctx.lineTo(W-10, y);
-    }
+    ctx.moveTo(x0, y0); ctx.lineTo(x0, y0+h);
+    ctx.moveTo(x0, y0+h); ctx.lineTo(x0+w, y0+h);
     ctx.stroke();
-
-    ctx.fillStyle = '#6B6F63';
-    ctx.font = '11px IBM Plex Mono, monospace';
-    ctx.textAlign = 'right';
-    const mvLabels = [40, 0, -40, -80, -120];
-    for (let gy = 0; gy <= 4; gy++) {
-      const y = 20 + gy*(H-50)/4;
-      ctx.fillText(mvLabels[gy] + '', 44, y+3);
-    }
-    ctx.textAlign = 'left';
-    ctx.fillText('mV', 6, 16);
-    ctx.fillText('0 ms', 50, H-6);
-    ctx.fillText('60 ms', W-40, H-6);
   }
 
-  function plotTrace(trace, color, dashed) {
-    const steps = trace.length;
-    const plotW = W - 60, plotH = H - 50;
+  function renderNominal() {
+    canvas.style.display = 'block';
+    eqEl.style.display = 'none';
+    clear();
+    const panelW = W/2 - 30, h = 150, y0 = 30;
+
+    // Panel 1: spike
+    plotAxes(45, y0, panelW, h);
     ctx.beginPath();
-    ctx.strokeStyle = color;
-    ctx.lineWidth = 1.8;
-    if (dashed) ctx.setLineDash([4,3]); else ctx.setLineDash([]);
-    for (let i = 0; i < steps; i++) {
-      const x = 50 + (i/steps)*plotW;
-      const y = 20 + ((40 - trace[i]) / 160) * plotH;
-      if (i === 0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    ctx.strokeStyle = ACCENT;
+    ctx.lineWidth = 2;
+    for (let i = 0; i <= 100; i++) {
+      const t = i/100;
+      const v = Math.exp(-Math.pow((t-0.35)*6,2)) * 1;
+      const x = 45 + t*panelW;
+      const yv = y0+h - v*(h-10);
+      if (i===0) ctx.moveTo(x,yv); else ctx.lineTo(x,yv);
     }
+    ctx.stroke();
+    axisLabel('Voltage', 10, y0+h/2, 'left');
+    axisLabel('time', 45+panelW/2-12, y0+h+18);
+    axisLabel('Action potential', 45, y0-10);
+
+    // Panel 2: step response
+    const x2 = 45 + panelW + 60;
+    plotAxes(x2, y0, panelW, h);
+    ctx.beginPath();
+    ctx.strokeStyle = ACCENT;
+    ctx.lineWidth = 2;
+    for (let i = 0; i <= 100; i++) {
+      const t = i/100;
+      let v;
+      if (t < 0.15) v = 0.85;
+      else if (t < 0.25) v = 0.85 - (t-0.15)/0.10*0.75;
+      else v = 0.10 + (1-Math.exp(-(t-0.25)*8))*0.55;
+      const x = x2 + t*panelW;
+      const yv = y0+h - v*(h-10);
+      if (i===0) ctx.moveTo(x,yv); else ctx.lineTo(x,yv);
+    }
+    ctx.stroke();
+    axisLabel('time', x2+panelW/2-12, y0+h+18);
+    axisLabel('Step response', x2, y0-10);
+  }
+
+  const SOBOL_LABELS = ['gNaT','gNaP','gCaH','gL','gKDR','gKM','gCaT','gH'];
+  const SOBOL_VALUES = [0.62, 0.06, 0.32, 0.08, 0.85, 0.28, 0.07, 0.45];
+  const SOBOL_EXCLUDE = [1, 3, 6]; // indices below threshold
+  const SOBOL_THRESHOLD = 0.15;
+
+  function renderSensitivity() {
+    canvas.style.display = 'block';
+    eqEl.style.display = 'none';
+    clear();
+    const x0 = 55, y0 = 20, w = W-90, h = 160;
+    plotAxes(x0, y0, w, h);
+    const n = SOBOL_LABELS.length;
+    const barW = w/n * 0.55;
+    const gap = w/n;
+
+    // threshold dashed line
+    const threshY = y0 + h - SOBOL_THRESHOLD*(h-10);
+    ctx.setLineDash([4,3]);
+    ctx.strokeStyle = DANGER;
+    ctx.beginPath();
+    ctx.moveTo(x0, threshY); ctx.lineTo(x0+w, threshY);
     ctx.stroke();
     ctx.setLineDash([]);
+
+    SOBOL_LABELS.forEach((lab, i) => {
+      const val = SOBOL_VALUES[i];
+      const barH = val*(h-10);
+      const bx = x0 + i*gap + (gap-barW)/2;
+      const by = y0+h-barH;
+      ctx.fillStyle = SOBOL_EXCLUDE.includes(i) ? '#C9C2B3' : ACCENT;
+      ctx.fillRect(bx, by, barW, barH);
+
+      ctx.fillStyle = MUTED;
+      ctx.font = '10px IBM Plex Mono, monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText(lab, bx+barW/2, y0+h+14);
+
+      if (SOBOL_EXCLUDE.includes(i)) {
+        ctx.fillStyle = DANGER;
+        ctx.font = 'bold 13px Inter, sans-serif';
+        ctx.fillText('\u2715', bx+barW/2, by-8);
+      }
+    });
+    axisLabel('Sobol index', 10, y0+h/2, 'left');
   }
 
-  function render() {
-    const params = {
-      gna: parseFloat(gnaSlider.value),
-      gk: parseFloat(gkSlider.value),
-      gl: parseFloat(glSlider.value),
-      iapp: parseFloat(iappSlider.value)
-    };
-    vals.gna.textContent = params.gna.toFixed(0);
-    vals.gk.textContent = params.gk.toFixed(0);
-    vals.gl.textContent = params.gl.toFixed(2);
-    vals.iapp.textContent = params.iapp.toFixed(1);
+  function renderFeatures() {
+    canvas.style.display = 'block';
+    eqEl.style.display = 'none';
+    clear();
+    const panelW = W/2 - 30, h = 150, y0 = 30;
 
-    ctx.clearRect(0,0,W,H);
-    drawAxes();
-
-    if (baselineCheckbox.checked) {
-      const baseTrace = simulate(BASELINE);
-      plotTrace(baseTrace, '#9AA08E', true);
-      legend.textContent = ' · dashed gray = baseline';
-    } else {
-      legend.textContent = '';
+    // Panel 1: spike w/ features
+    plotAxes(45, y0, panelW, h);
+    const pts = [];
+    ctx.beginPath();
+    ctx.strokeStyle = ACCENT_DEEP;
+    ctx.lineWidth = 2;
+    for (let i = 0; i <= 100; i++) {
+      const t = i/100;
+      const v = Math.exp(-Math.pow((t-0.35)*6,2));
+      const x = 45 + t*panelW;
+      const yv = y0+h - v*(h-10);
+      if (i===0) ctx.moveTo(x,yv); else ctx.lineTo(x,yv);
+      if (i===15 || i===35 || i===55) pts.push([x,yv]);
     }
+    ctx.stroke();
+    pts.forEach(p => {
+      ctx.beginPath();
+      ctx.fillStyle = '#C0524A';
+      ctx.arc(p[0], p[1], 4, 0, Math.PI*2);
+      ctx.fill();
+    });
+    axisLabel('time', 45+panelW/2-12, y0+h+18);
+    axisLabel('Peak height & width', 45, y0-10);
 
-    const trace = simulate(params);
-    plotTrace(trace, '#5B7052', false);
+    // Panel 2: step response w/ features
+    const x2 = 45 + panelW + 60;
+    plotAxes(x2, y0, panelW, h);
+    const pts2 = [];
+    ctx.beginPath();
+    ctx.strokeStyle = ACCENT_DEEP;
+    ctx.lineWidth = 2;
+    for (let i = 0; i <= 100; i++) {
+      const t = i/100;
+      let v;
+      if (t < 0.15) v = 0.85;
+      else if (t < 0.25) v = 0.85 - (t-0.15)/0.10*0.75;
+      else v = 0.10 + (1-Math.exp(-(t-0.25)*8))*0.55;
+      const x = x2 + t*panelW;
+      const yv = y0+h - v*(h-10);
+      if (i===0) ctx.moveTo(x,yv); else ctx.lineTo(x,yv);
+      if (i===14 || i===24 || i===70) pts2.push([x,yv]);
+    }
+    ctx.stroke();
+    pts2.forEach(p => {
+      ctx.beginPath();
+      ctx.fillStyle = '#C0524A';
+      ctx.arc(p[0], p[1], 4, 0, Math.PI*2);
+      ctx.fill();
+    });
+    axisLabel('time', x2+panelW/2-12, y0+h+18);
+    axisLabel('Drop & recovery level', x2, y0-10);
   }
 
-  [gnaSlider, gkSlider, glSlider, iappSlider, baselineCheckbox].forEach(el => {
-    el.addEventListener('input', render);
-  });
+  function box(x,y,w,h,label,fill) {
+    ctx.strokeStyle = ACCENT_DEEP;
+    ctx.lineWidth = 1.5;
+    ctx.fillStyle = fill || 'rgba(91,112,82,0.08)';
+    ctx.fillRect(x,y,w,h);
+    ctx.strokeRect(x,y,w,h);
+    ctx.fillStyle = INK;
+    ctx.font = '12px Inter, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(label, x+w/2, y+h/2+4);
+  }
 
-  render();
+  function arrow(x1,y1,x2,y2,dashed) {
+    ctx.strokeStyle = MUTED;
+    ctx.lineWidth = 1.5;
+    if (dashed) ctx.setLineDash([4,3]); else ctx.setLineDash([]);
+    ctx.beginPath();
+    ctx.moveTo(x1,y1); ctx.lineTo(x2,y2);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    const angle = Math.atan2(y2-y1, x2-x1);
+    ctx.beginPath();
+    ctx.moveTo(x2,y2);
+    ctx.lineTo(x2-8*Math.cos(angle-0.4), y2-8*Math.sin(angle-0.4));
+    ctx.lineTo(x2-8*Math.cos(angle+0.4), y2-8*Math.sin(angle+0.4));
+    ctx.closePath();
+    ctx.fillStyle = MUTED;
+    ctx.fill();
+  }
+
+  function renderGAN() {
+    canvas.style.display = 'block';
+    eqEl.style.display = 'none';
+    clear();
+    ctx.textAlign = 'left';
+    ctx.fillStyle = INK;
+    ctx.font = '13px Inter, sans-serif';
+    ctx.fillText('[P\u1D63, F]', 40, 60);
+    arrow(90, 55, 220, 55);
+    box(230, 30, 140, 50, 'Discriminator');
+    box(230, 140, 140, 50, 'Generator');
+    arrow(300, 140, 300, 90, true);
+    arrow(300, 90, 300, 30, false);
+    ctx.fillStyle = INK;
+    ctx.font = '13px Inter, sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText('P\u1D4D | F', 380, 170);
+    arrow(370, 165, 500, 165);
+
+    ctx.fillStyle = MUTED;
+    ctx.font = '11px IBM Plex Mono, monospace';
+    ctx.fillText('real vs. generated', 240, 100);
+  }
+
+  function renderInference() {
+    canvas.style.display = 'block';
+    eqEl.style.display = 'none';
+    clear();
+    box(20, 90, 110, 44, 'Real Data');
+    arrow(75, 90, 75, 45);
+    ctx.fillStyle = INK;
+    ctx.font = '13px Inter, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('F\u1D63', 75, 35);
+    arrow(130, 30, 220, 30);
+    box(230, 10, 150, 44, 'Trained Generator');
+    arrow(305, 54, 305, 90);
+    ctx.fillText('P\u1D4D | F\u1D63', 305, 108);
+
+    // ensemble of traces on the right
+    const x0 = 420, y0 = 30, w = 200, h = 150;
+    plotAxes(x0, y0, w, h);
+    for (let e = 0; e < 12; e++) {
+      const jitter = (Math.random()-0.5)*0.15;
+      const shift = (Math.random()-0.5)*0.08;
+      ctx.beginPath();
+      ctx.strokeStyle = 'rgba(107,111,99,0.35)';
+      ctx.lineWidth = 1;
+      for (let i = 0; i <= 60; i++) {
+        const t = i/60;
+        const v = Math.exp(-Math.pow((t-0.35-shift)*6,2))*(1+jitter);
+        const x = x0 + t*w;
+        const yv = y0+h - v*(h-10);
+        if (i===0) ctx.moveTo(x,yv); else ctx.lineTo(x,yv);
+      }
+      ctx.stroke();
+    }
+    axisLabel('Inferred parameter ensemble', x0, y0-8);
+  }
+
+  function update() {
+    buildStepper();
+    const s = STEPS[current];
+    titleEl.textContent = s.title;
+    descEl.textContent = s.desc;
+    s.render();
+    prevBtn.disabled = current === 0;
+    nextBtn.disabled = current === STEPS.length - 1;
+  }
+
+  prevBtn.addEventListener('click', () => { if (current>0) { current--; update(); } });
+  nextBtn.addEventListener('click', () => { if (current<STEPS.length-1) { current++; update(); } });
+
+  update();
 })();
 </script>
 </body>
