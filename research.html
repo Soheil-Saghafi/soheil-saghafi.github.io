@@ -197,6 +197,23 @@
 
   function clear() { ctx.clearRect(0,0,W,H); }
 
+  // Traced from the actual figure: flat baseline, sharp drop, low plateau,
+  // then a sharp rebound that slightly overshoots baseline before settling.
+  function stepResponseCurve(t) {
+    if (t < 0.105) return 0.542;
+    if (t < 0.164) {
+      const f = (t-0.105)/(0.164-0.105);
+      return 0.542 + f*(0.083-0.542);
+    }
+    if (t < 0.368) return 0.083;
+    if (t < 0.398) {
+      const f = (t-0.368)/(0.398-0.368);
+      return 0.083 + f*(0.60-0.083);
+    }
+    const decay = Math.exp(-(t-0.398)*18);
+    return 0.542 + (0.60-0.542)*decay;
+  }
+
   function label(text, x, y, opts) {
     opts = opts || {};
     ctx.fillStyle = opts.color || MUTED;
@@ -261,11 +278,7 @@
     }
 
     drawPanel(50, t => Math.exp(-Math.pow((t-0.35)*6,2)), 'Action potential', ['40','0','-40','-80','-120']);
-    drawPanel(50+panelW+gap, t => {
-      if (t < 0.15) return 0.85;
-      if (t < 0.25) return 0.85 - (t-0.15)/0.10*0.75;
-      return 0.10 + (1-Math.exp(-(t-0.25)*8))*0.55;
-    }, 'Step response', ['40','0','-40','-80','-120']);
+    drawPanel(50+panelW+gap, stepResponseCurve, 'Step response', ['40','0','-40','-80','-120']);
 
     label('Voltage (mV)', 14, 18, {align:'left', size: 11});
   }
@@ -359,11 +372,7 @@
     }
 
     drawPanel(50, t => Math.exp(-Math.pow((t-0.35)*6,2)), [18,42,66], 'Peak height & width');
-    drawPanel(50+panelW+gap, t => {
-      if (t < 0.15) return 0.85;
-      if (t < 0.25) return 0.85 - (t-0.15)/0.10*0.75;
-      return 0.10 + (1-Math.exp(-(t-0.25)*8))*0.55;
-    }, [17,29,84], 'Drop & recovery level');
+    drawPanel(50+panelW+gap, stepResponseCurve, [12,30,66], 'Drop & recovery level');
 
     label('Voltage', 14, 18, {align:'left', size: 11});
   }
@@ -510,10 +519,7 @@
       ctx.lineWidth = 1.1;
       for (let i = 0; i <= 70; i++) {
         const t = i/70;
-        let v;
-        if (t < 0.15) v = 0.85+jitter*0.2;
-        else if (t < 0.25) v = 0.85 - (t-0.15)/0.10*0.75;
-        else v = 0.10 + (1-Math.exp(-(t-0.25)*8))*(0.55+jitter);
+        const v = stepResponseCurve(t) + jitter*(t>0.4 ? 1 : 0.3);
         const x = x0 + w*0.52 + t*w*0.48;
         const yv = y0+h - v*(h-8) - 4;
         if (i===0) ctx.moveTo(x,yv); else ctx.lineTo(x,yv);
