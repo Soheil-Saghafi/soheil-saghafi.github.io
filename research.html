@@ -58,38 +58,46 @@
         <span class="ra-chevron" aria-hidden="true"></span>
       </summary>
       <div class="ra-body">
-        <p>
-          A central theme of my work is building conductance-based biophysical
-          models of excitable cells and inferring their parameters from data.
-          In
-          <a href="publications.html">Inferring Parameters of Populations of Pyramidal Neuron Models in Alzheimer's Disease Mouse Models Using Generative Adversarial Networks</a>,
-          we used a Hodgkin-Huxley-style model of pyramidal neuron excitability and
-          a GAN-based inference scheme to recover ion-channel conductances that
-          reproduce experimentally observed firing patterns &mdash; including the
-          altered excitability seen in Alzheimer's disease mouse models.
-        </p>
-        <p>
-          The widget below walks through that six-step pipeline &mdash; from the
-          mechanistic model, through parameter fitting and sensitivity-based
-          dimensionality reduction, to building a synthetic training set and
-          training the conditional GAN that ultimately infers parameters from
-          real experimental recordings.
-        </p>
+        <div class="ra-project">
+          <p class="ra-project-title">Inferring Neuron Excitability Parameters with Conditional GANs</p>
+          <p>
+            A central theme of my work is building conductance-based biophysical
+            models of excitable cells and inferring their parameters from data.
+            In
+            <a href="publications.html">Inferring Parameters of Populations of Pyramidal Neuron Models in Alzheimer's Disease Mouse Models Using Generative Adversarial Networks</a>,
+            we used a Hodgkin-Huxley-style model of pyramidal neuron excitability and
+            a GAN-based inference scheme to recover ion-channel conductances that
+            reproduce experimentally observed firing patterns &mdash; including the
+            altered excitability seen in Alzheimer's disease mouse models.
+          </p>
+          <p>
+            The widget below walks through that six-step pipeline &mdash; from the
+            mechanistic model, through parameter fitting and sensitivity-based
+            dimensionality reduction, to building a synthetic training set and
+            training the conditional GAN that ultimately infers parameters from
+            real experimental recordings.
+          </p>
 
-        <div class="pipeline-demo" id="pipeline-demo">
-          <div class="pipeline-steps" id="pipeline-steps"></div>
+          <div class="pipeline-demo" id="pipeline-demo">
+            <div class="pipeline-steps" id="pipeline-steps"></div>
 
-          <div class="pipeline-panel">
-            <p class="pipeline-step-title" id="pipeline-title"></p>
-            <p class="pipeline-step-desc" id="pipeline-desc"></p>
-            <div class="pipeline-equation" id="pipeline-equation" style="display:none;"></div>
-            <canvas id="pipeline-canvas" width="700" height="320"></canvas>
+            <div class="pipeline-panel">
+              <p class="pipeline-step-title" id="pipeline-title"></p>
+              <p class="pipeline-step-desc" id="pipeline-desc"></p>
+              <div class="pipeline-equation" id="pipeline-equation" style="display:none;"></div>
+              <canvas id="pipeline-canvas" width="700" height="320"></canvas>
+            </div>
+
+            <div class="pipeline-nav">
+              <button type="button" id="pipeline-prev">&larr; Previous</button>
+              <button type="button" id="pipeline-next">Next &rarr;</button>
+            </div>
           </div>
+        </div>
 
-          <div class="pipeline-nav">
-            <button type="button" id="pipeline-prev">&larr; Previous</button>
-            <button type="button" id="pipeline-next">Next &rarr;</button>
-          </div>
+        <div class="ra-project">
+          <p class="ra-project-title">[Next Project Title]</p>
+          <p class="placeholder-note">Send the details for another project here &mdash; it'll appear as its own clearly separated block, optionally with its own interactive demo like the one above.</p>
         </div>
       </div>
     </details>
@@ -102,7 +110,10 @@
         <span class="ra-chevron" aria-hidden="true"></span>
       </summary>
       <div class="ra-body">
-        <p class="placeholder-note">Demo coming soon &mdash; let me know which paper or project you'd like featured here.</p>
+        <div class="ra-project">
+          <p class="ra-project-title">[Project Title]</p>
+          <p class="placeholder-note">Demo coming soon &mdash; let me know which paper or project you'd like featured here.</p>
+        </div>
       </div>
     </details>
 
@@ -114,7 +125,10 @@
         <span class="ra-chevron" aria-hidden="true"></span>
       </summary>
       <div class="ra-body">
-        <p class="placeholder-note">Demo coming soon &mdash; let me know which paper or project you'd like featured here.</p>
+        <div class="ra-project">
+          <p class="ra-project-title">[Project Title]</p>
+          <p class="placeholder-note">Demo coming soon &mdash; let me know which paper or project you'd like featured here.</p>
+        </div>
       </div>
     </details>
   </section>
