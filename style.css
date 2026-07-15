@@ -281,3 +281,79 @@ ul.entry-desc li:last-child { margin-bottom: 0; }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
 }
+
+/* ---------- research areas ---------- */
+.research-area {
+  padding: 28px 0;
+  border-bottom: 1px solid var(--rule);
+}
+.research-area:last-child { border-bottom: none; }
+.research-area h3 {
+  font-size: 1.12rem;
+  margin-bottom: 10px;
+}
+.research-area p { margin: 0 0 12px; }
+
+/* ---------- HH neuron demo ---------- */
+.hh-demo {
+  background: var(--paper-raised);
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  padding: 20px;
+  margin-top: 18px;
+}
+.hh-controls {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px 24px;
+  margin-bottom: 14px;
+}
+.hh-control label {
+  display: block;
+  font-size: 0.82rem;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+.hh-control .hh-unit {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.76rem;
+}
+.hh-control input[type="range"] {
+  width: 100%;
+  accent-color: var(--accent);
+  vertical-align: middle;
+}
+.hh-value {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.8rem;
+  color: var(--accent-deep);
+  margin-left: 8px;
+}
+.hh-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin-bottom: 14px;
+  cursor: pointer;
+}
+.hh-checkbox input { accent-color: var(--accent); }
+#hh-canvas {
+  width: 100%;
+  height: auto;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  display: block;
+}
+.hh-caption {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.76rem;
+  color: var(--muted);
+  margin: 8px 0 0;
+}
+
+@media (max-width: 560px) {
+  .hh-controls { grid-template-columns: 1fr; }
+}
