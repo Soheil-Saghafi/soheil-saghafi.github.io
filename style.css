@@ -375,19 +375,48 @@ ul.entry-desc li:last-child { margin-bottom: 0; }
 .ra-body p:last-child { margin-bottom: 0; }
 
 .ra-project {
-  padding: 26px 0;
   border-top: 1px solid var(--rule);
 }
 .ra-project:first-child {
-  padding-top: 0;
   border-top: none;
+}
+.ra-project-summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 20px 40px 20px 0;
+  position: relative;
+  display: block;
+  transition: opacity 0.15s;
+}
+.ra-project-summary::-webkit-details-marker { display: none; }
+.ra-project-summary:hover { opacity: 0.75; }
+.ra-project-summary:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 .ra-project-title {
   font-family: 'Source Serif 4', serif;
   font-weight: 600;
   font-size: 1.02rem;
   color: var(--ink);
-  margin: 0 0 12px !important;
+}
+.ra-project-chevron {
+  position: absolute;
+  top: 24px;
+  right: 4px;
+  width: 9px;
+  height: 9px;
+  border-right: 2px solid var(--muted);
+  border-bottom: 2px solid var(--muted);
+  transform: rotate(-45deg);
+  transition: transform 0.2s;
+}
+.ra-project[open] .ra-project-chevron {
+  transform: rotate(45deg);
+  border-color: var(--accent-deep);
+}
+.ra-project-body {
+  padding: 0 0 24px;
 }
 .ra-figure {
   margin-top: 16px;
