@@ -389,6 +389,27 @@ ul.entry-desc li:last-child { margin-bottom: 0; }
   color: var(--ink);
   margin: 0 0 12px !important;
 }
+.ra-figure {
+  margin-top: 16px;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  padding: 16px;
+}
+.ra-figure video {
+  width: 100%;
+  max-width: 420px;
+  display: block;
+  margin: 0 auto;
+  border-radius: 4px;
+  background: #000;
+}
+.ra-figure-caption {
+  font-size: 0.82rem;
+  color: var(--muted);
+  margin: 12px 0 0 !important;
+  text-align: center;
+}
 
 /* ---------- pipeline walkthrough demo ---------- */
 .pipeline-demo {
