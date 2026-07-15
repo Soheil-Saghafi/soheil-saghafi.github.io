@@ -282,17 +282,66 @@ ul.entry-desc li:last-child { margin-bottom: 0; }
   html { scroll-behavior: auto; }
 }
 
-/* ---------- research areas ---------- */
-.research-area {
-  padding: 28px 0;
+/* ---------- research areas: clickable accordion cards ---------- */
+.research-accordion {
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  background: var(--paper-raised);
+  margin-bottom: 14px;
+  overflow: hidden;
+}
+.research-accordion summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 18px 50px 18px 20px;
+  position: relative;
+  display: block;
+  transition: background 0.15s;
+}
+.research-accordion summary::-webkit-details-marker { display: none; }
+.research-accordion summary:hover { background: rgba(91,112,82,0.05); }
+.research-accordion summary:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+.ra-title {
+  display: block;
+  font-family: 'Source Serif 4', serif;
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: var(--ink);
+  margin-bottom: 4px;
+}
+.ra-desc {
+  display: block;
+  font-size: 0.88rem;
+  color: var(--muted);
+  max-width: 62ch;
+  line-height: 1.5;
+}
+.ra-chevron {
+  position: absolute;
+  top: 22px;
+  right: 20px;
+  width: 10px;
+  height: 10px;
+  border-right: 2px solid var(--muted);
+  border-bottom: 2px solid var(--muted);
+  transform: rotate(-45deg);
+  transition: transform 0.2s;
+}
+.research-accordion[open] .ra-chevron {
+  transform: rotate(45deg);
+  border-color: var(--accent-deep);
+}
+.research-accordion[open] summary {
   border-bottom: 1px solid var(--rule);
 }
-.research-area:last-child { border-bottom: none; }
-.research-area h3 {
-  font-size: 1.12rem;
-  margin-bottom: 10px;
+.ra-body {
+  padding: 22px 20px 26px;
 }
-.research-area p { margin: 0 0 12px; }
+.ra-body p { margin: 0 0 14px; }
+.ra-body p:last-child { margin-bottom: 0; }
 
 /* ---------- pipeline walkthrough demo ---------- */
 .pipeline-demo {
