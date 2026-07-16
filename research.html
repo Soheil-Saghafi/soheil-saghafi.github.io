@@ -313,6 +313,54 @@
 
         <details class="ra-project">
           <summary class="ra-project-summary">
+            <span class="ra-project-title">Detection of Chagas Disease from the ECG: The George B. Moody PhysioNet Challenge 2025</span>
+            <span class="ra-project-chevron" aria-hidden="true"></span>
+          </summary>
+          <div class="ra-project-body">
+            <p>
+              In
+              <a href="https://physionetchallenges.org/2025/" target="_blank" rel="noopener">Detection of Chagas Disease from the ECG: The George B. Moody PhysioNet Challenge 2025</a>
+              (Reyna, Saghafi, Koscova, Weigle, Pavlus, Elola, Seyedi, Campbell, Li, Barreto, Sabino, Ribeiro,
+              Ribeiro, Sameni &amp; Clifford, <em>Physiological Measurement</em>, 2026), we ran the 26th George B.
+              Moody PhysioNet Challenge, inviting teams worldwide to build algorithms that flag likely Chagas
+              disease &mdash; a parasitic infection endemic to Latin America that can silently damage the heart
+              for years before causing arrhythmias or heart failure &mdash; directly from a standard 12-lead ECG,
+              since confirmatory blood (serological) testing capacity is scarce in the regions that need it most.
+            </p>
+            <p>
+              The Challenge assembled over 378,000 ECGs across six databases (a large weakly-labeled Brazilian
+              cohort for training, plus three completely hidden datasets &mdash; REDS-II, SaMi-Trop 3, and
+              ELSA-Brasil &mdash; for validation and test) and scored entries with a custom metric, TPR@5%: the
+              true positive rate achieved among only the top 5% of patients an algorithm ranks as highest-risk,
+              mirroring the roughly 5% serological testing capacity available in real Chagas-endemic settings.
+              We also built ensemble models (arithmetic mean, geometric mean, and median) combining the
+              top-performing individual entries, and benchmarked everything against a previously published
+              baseline model and against ECGFounder, a general-purpose ECG foundation model.
+            </p>
+            <p>
+              Over 650 participants across 111 teams submitted more than 1,300 entries. The best individual
+              model (Biomed-Cardio) reached a mean TPR@5% of 0.323, but our simple ensembles proved more
+              robust across datasets &mdash; the arithmetic-mean ensemble averaged 0.295 and generalized better to
+              the hardest, most-realistic dataset (ELSA-Brasil, a largely asymptomatic screening-style
+              population), clearly outperforming both the baseline model (0.107) and the ECGFounder foundation
+              model (0.242). In practical terms, the top approaches could identify roughly one in two Chagas
+              patients in a symptomatic cohort, and about one in six in a largely asymptomatic screening
+              population &mdash; versus the one-in-fifty rate expected from testing at random. Feature-importance
+              analysis further showed the models were keying in on clinically sensible signals: conduction-system
+              abnormalities, bradyarrhythmias, fascicular/bundle branch blocks, and ventricular depolarization
+              patterns consistent with chronic Chagas cardiomyopathy, reproducible across all three hidden
+              datasets.
+            </p>
+
+            <div class="ra-figure">
+              <img src="chagas-roc-fig6.png" alt="ROC curves comparing baseline model, top individual PhysioNet Challenge models, ECGFounder, and the best ensemble across three datasets" style="width:100%;max-width:720px;display:block;margin:0 auto;border-radius:4px;">
+              <p class="ra-figure-caption">ROC curves across the three hidden test datasets: the ensemble model (orange) consistently sits above both the ECGFounder foundation model (red) and the baseline (black), with the gray band showing the spread of the top 8 individual Challenge entries. The insets zoom into the low false-positive-rate region that matters most for real-world screening, where the ensemble's advantage is clearest on REDS-II and SaMi-Trop 3, and more modest on the harder ELSA-Brasil cohort.</p>
+            </div>
+          </div>
+        </details>
+
+        <details class="ra-project">
+          <summary class="ra-project-summary">
             <span class="ra-project-title">Graph Trilateration for Indoor Localization with Sparse BLE Receivers</span>
             <span class="ra-project-chevron" aria-hidden="true"></span>
           </summary>
