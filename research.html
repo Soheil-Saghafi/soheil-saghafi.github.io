@@ -270,6 +270,49 @@
       <div class="ra-body">
         <details class="ra-project">
           <summary class="ra-project-summary">
+            <span class="ra-project-title">Predicting Traumatic Brain Injury Using Temporal Attention on Sleep-Wake Data</span>
+            <span class="ra-project-chevron" aria-hidden="true"></span>
+          </summary>
+          <div class="ra-project-body">
+            <p>
+              In
+              <a href="#" target="_blank" rel="noopener">Predicting Traumatic Brain Injury Post-Trauma Using Temporal Attention on Sleep-Wake Data</a>
+              (Saghafi, Li, Neylan, Thomas, Stevens, Jovanovic, Germine, Bucher, Huibregtse, Linnstaedt, An, Harnett,
+              Norrholm, Conti, Seligowski, Dillon, Vizer, McKibben, Albertorio-S&aacute;ez, Beaudoin, Matson, Calhoun,
+              Harte, Bruce, Haran, Storrow, Lewandowski, Musey, Hendry, Swor, Pearson, Peak, O'Neil, Kessler, Koenen,
+              McLean, Clifford &amp; Bahrami Rad, <em>IEEE JBHI</em> preprint), we ask a practical question for
+              wearable-based TBI screening: after someone comes through the emergency department with a possible
+              brain injury, how many days of wrist-worn sleep/wake data actually need to be collected to tell
+              TBI-positive and TBI-negative patients apart?
+            </p>
+            <p>
+              Using the AURORA study cohort &mdash; more than 2,000 emergency department patients wearing a
+              research wristwatch for weeks after trauma, with TBI status defined by a GFAP blood-biomarker cutoff
+              &mdash; we extracted both daily sleep features (total sleep time, fragmentation, wake episodes, ENMO,
+              etc.) and fine-grained, minute-level activity time series. A deep network combining residual
+              convolutional blocks with a temporal self-attention layer was trained to classify TBI+ vs. TBI-
+              directly from the activity time series, letting the model learn for itself which days after the
+              injury actually matter for the decision, rather than assuming every day contributes equally.
+            </p>
+            <p>
+              The attention weights told a clear story: the model consistently focused most heavily on the
+              <strong>first 7 days</strong> post-injury, with attention tapering off over the following two weeks.
+              Classification performance backed this up directly &mdash; restricting the model to the first 7 days
+              of data outperformed using 14 or 21 days (81% sensitivity vs. 40% and 45%, respectively, with the
+              highest F1 score at 7 days), and the attention-based network beat both logistic regression and SVM
+              baselines at every window length. In short, more data isn't always better: for TBI screening from
+              sleep/wake patterns, the first week after trauma carries the signal, and later days mostly add noise.
+            </p>
+
+            <div class="ra-figure">
+              <img src="tbi-attention-fig5.png" alt="Line chart of mean attention weight over 21 days post-injury, highest in the first week and declining over subsequent weeks" style="width:100%;max-width:640px;display:block;margin:0 auto;border-radius:4px;">
+              <p class="ra-figure-caption">Averaged across patients and cross-validation folds, the model's attention weight is highest in week 1 post-injury (red) and steadily declines through weeks 2 (yellow) and 3 (orange) &mdash; the model itself has learned that early data matters most for telling TBI+ from TBI- patients.</p>
+            </div>
+          </div>
+        </details>
+
+        <details class="ra-project">
+          <summary class="ra-project-summary">
             <span class="ra-project-title">Graph Trilateration for Indoor Localization with Sparse BLE Receivers</span>
             <span class="ra-project-chevron" aria-hidden="true"></span>
           </summary>
