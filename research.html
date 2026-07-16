@@ -270,6 +270,90 @@
       <div class="ra-body">
         <details class="ra-project">
           <summary class="ra-project-summary">
+            <span class="ra-project-title">Graph Trilateration for Indoor Localization with Sparse BLE Receivers</span>
+            <span class="ra-project-chevron" aria-hidden="true"></span>
+          </summary>
+          <div class="ra-project-body">
+            <p>
+              In
+              <a href="https://doi.org/10.3390/s23239517" target="_blank" rel="noopener">Graph Trilateration for Indoor Localization in Sparsely Distributed Edge Computing Devices in Complex Environments Using Bluetooth Technology</a>
+              (Kiarashi, Saghafi, Das, Hegde, Madala, Nakum, Singh, Tweedy, Doiron, Rodriguez, Levey, Clifford &amp;
+              Kwon, <em>Sensors</em>, 2023), we tackle a problem that standard Bluetooth low energy (BLE)
+              trilateration is not built for: localizing people in a large, structurally complex space
+              (1700&nbsp;m&sup2;) using edge receivers that are sparse and unevenly spaced, rather than densely and
+              uniformly installed. The study site is a real clinical facility used for therapeutic activities with
+              participants who have mild cognitive impairment (MCI), instrumented with 39 ceiling-mounted Raspberry
+              Pi edge computing devices.
+            </p>
+            <p>
+              Standard trilateration needs at least three receivers detecting a stable RSSI at once &mdash; a
+              condition that rarely holds when receivers are sparse and signals are degraded by metal ceiling
+              structures. Our <strong>graph trilateration</strong> method instead treats every edge device that
+              detects a beacon as a node in a graph, and uses the <em>received hits strength index</em> (RHSI)
+              &mdash; how many times a device detects the beacon within a sliding time window &mdash; alongside RSSI
+              to weight each pairwise distance estimate. Two variants were compared: <strong>RHSI-Agg</strong>,
+              which aggregates pairwise location estimates using RHSI-based weights, and <strong>RHSI-Edge</strong>,
+              which folds RHSI into each pairwise distance estimate before averaging. Corner cases with fewer than
+              three detecting devices, and temporal smoothing across consecutive time windows, were also handled
+              explicitly.
+            </p>
+            <p>
+              Across the full study site, graph trilateration cut the average positioning error from 6.39&nbsp;m
+              (standard trilateration) to as low as 4.44&nbsp;m, and improved region-level localization accuracy
+              from 65.7% to 85.2%. Performance varied by region depending on receiver density &mdash; the
+              best-covered corridor achieved over 90% room-level accuracy, while sparser regions lagged, confirming
+              that receiver density and positioning accuracy are directly linked. The work also established the
+              open-source edge computing framework (Raspberry Pi 4-based receivers, ~$200/unit) that our subsequent
+              multi-beacon study builds on.
+            </p>
+
+            <div class="ra-figure">
+              <svg viewBox="0 0 640 300" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:640px;display:block;margin:0 auto;font-family:'IBM Plex Mono',monospace;">
+                <rect x="0" y="0" width="640" height="300" fill="#FCFBF8"/>
+                <line x1="80" y1="30" x2="80" y2="230" stroke="#B9B3A2" stroke-width="1.2"/>
+                <line x1="80" y1="230" x2="600" y2="230" stroke="#B9B3A2" stroke-width="1.2"/>
+                <g stroke="#DAD5C7" stroke-width="1">
+                  <line x1="80" y1="230" x2="600" y2="230"/>
+                  <line x1="80" y1="180" x2="600" y2="180"/>
+                  <line x1="80" y1="130" x2="600" y2="130"/>
+                  <line x1="80" y1="80" x2="600" y2="80"/>
+                  <line x1="80" y1="30" x2="600" y2="30"/>
+                </g>
+                <g fill="#6B6F63" font-size="11" text-anchor="end">
+                  <text x="70" y="234">0%</text>
+                  <text x="70" y="184">25%</text>
+                  <text x="70" y="134">50%</text>
+                  <text x="70" y="84">75%</text>
+                  <text x="70" y="34">100%</text>
+                </g>
+                <!-- bars: Standard Trilateration (65.74%), Graph w/o interp (84.11%), Graph with interp (85.19%) -->
+                <g>
+                  <rect x="140" y="99.5" width="70" height="130.5" fill="#D8D2C2"/>
+                  <rect x="300" y="52.7" width="70" height="177.3" fill="#5B7052"/>
+                  <rect x="460" y="49.9" width="70" height="180.1" fill="#3C4E36"/>
+                </g>
+                <g fill="#1E2A22" font-size="12" text-anchor="middle" font-weight="600" font-family="Inter, sans-serif">
+                  <text x="175" y="93">65.7%</text>
+                  <text x="335" y="46">84.1%</text>
+                  <text x="495" y="43">85.2%</text>
+                </g>
+                <g fill="#6B6F63" font-size="10.5" text-anchor="middle">
+                  <text x="175" y="250">Standard</text>
+                  <text x="175" y="263">Trilateration</text>
+                  <text x="335" y="250">Graph Trilateration</text>
+                  <text x="335" y="263">(w/o interpolation)</text>
+                  <text x="495" y="250">Graph Trilateration</text>
+                  <text x="495" y="263">(with interpolation)</text>
+                </g>
+                <text x="20" y="20" fill="#1E2A22" font-size="12" font-weight="600" font-family="Inter, sans-serif">Region-level localization accuracy across the study site</text>
+              </svg>
+              <p class="ra-figure-caption">Graph trilateration raises region-level localization accuracy from 65.7% (standard trilateration) to over 84%, while also reducing average positioning error from 6.39&nbsp;m to 4.44&nbsp;m (data from Table 1 &amp; Table 2 of Kiarashi et al., 2023).</p>
+            </div>
+          </div>
+        </details>
+
+        <details class="ra-project">
+          <summary class="ra-project-summary">
             <span class="ra-project-title">Optimizing Multi-Beacon Deployment for Indoor BLE Localization</span>
             <span class="ra-project-chevron" aria-hidden="true"></span>
           </summary>
