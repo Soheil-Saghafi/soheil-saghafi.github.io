@@ -270,11 +270,104 @@
       <div class="ra-body">
         <details class="ra-project">
           <summary class="ra-project-summary">
-            <span class="ra-project-title">[Project Title]</span>
+            <span class="ra-project-title">Optimizing Multi-Beacon Deployment for Indoor BLE Localization</span>
             <span class="ra-project-chevron" aria-hidden="true"></span>
           </summary>
           <div class="ra-project-body">
-            <p class="placeholder-note">Demo coming soon &mdash; let me know which paper or project you'd like featured here.</p>
+            <p>
+              In
+              <a href="https://doi.org/10.1049/dgt2.70001" target="_blank" rel="noopener">Indoor Localization Using Multi-Bluetooth Beacon Deployment in a Sparse Edge Computing Environment</a>
+              (Saghafi, Kiarashi, Rodriguez, Levey, Kwon &amp; Clifford, <em>Digital Twins and Applications</em>, 2025), we
+              extend our earlier <a href="https://doi.org/10.3390/s23239517" target="_blank" rel="noopener">graph
+              trilateration</a> approach for BLE-based indoor localization by asking a practical deployment question:
+              rather than adding more fixed ceiling-mounted receivers, what happens if a person simply wears more
+              BLE beacons at once?
+            </p>
+            <p>
+              Working in the same 1700&nbsp;m&sup2; clinical facility &mdash; instrumented with 39 sparsely
+              distributed Raspberry Pi edge receivers &mdash; participants wore a belt carrying up to seven BLE
+              beacons simultaneously. Each beacon's individual localization accuracy (via RHSI-edge trilateration)
+              was ranked from worst to best, and beacons were then combined incrementally, worst-performing first,
+              to see whether pooling noisy, independent transmitters could compensate for any single beacon's poor
+              signal reception. We also modeled the effect statistically: if each beacon has an independent
+              probability <em>p</em> of a successful RSSI reception in a given window, the probability that
+              <em>at least one</em> of <em>N</em> worn beacons is received is 1&nbsp;&minus;&nbsp;(1&minus;p)<sup>N</sup>,
+              which &rarr; 1 as N grows &mdash; the statistical basis for why redundant beacons help.
+            </p>
+            <p>
+              The result was a clear diminishing-returns curve: localization error fell sharply from a worst-case
+              9.09&nbsp;m with a single beacon to 2.94&nbsp;m with three beacons combined, after which adding a
+              fourth, fifth, sixth, or seventh beacon produced only marginal further improvement. The benefit of
+              extra beacons was also more pronounced in low-density regions of the facility (fewer nearby
+              receivers) than in high-density regions, where a single beacon was already reasonably well served.
+              Practically, this points to three simultaneously worn beacons as a sensible operating point for
+              sparse edge-computing deployments &mdash; enough redundancy to guard against dropped signals, without
+              the cost or interference risk of instrumenting every participant with many transmitters.
+            </p>
+
+            <div class="ra-figure">
+              <svg viewBox="0 0 640 300" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:640px;display:block;margin:0 auto;font-family:'IBM Plex Mono',monospace;">
+                <rect x="0" y="0" width="640" height="300" fill="#FCFBF8"/>
+                <!-- axes -->
+                <line x1="70" y1="30" x2="70" y2="240" stroke="#B9B3A2" stroke-width="1.2"/>
+                <line x1="70" y1="240" x2="600" y2="240" stroke="#B9B3A2" stroke-width="1.2"/>
+                <!-- gridlines + y labels (0 to 10 m) -->
+                <g stroke="#DAD5C7" stroke-width="1">
+                  <line x1="70" y1="240" x2="600" y2="240"/>
+                  <line x1="70" y1="198" x2="600" y2="198"/>
+                  <line x1="70" y1="156" x2="600" y2="156"/>
+                  <line x1="70" y1="114" x2="600" y2="114"/>
+                  <line x1="70" y1="72" x2="600" y2="72"/>
+                  <line x1="70" y1="30" x2="600" y2="30"/>
+                </g>
+                <g fill="#6B6F63" font-size="11" text-anchor="end">
+                  <text x="60" y="244">0</text>
+                  <text x="60" y="202">2</text>
+                  <text x="60" y="160">4</text>
+                  <text x="60" y="118">6</text>
+                  <text x="60" y="76">8</text>
+                  <text x="60" y="34">10</text>
+                </g>
+                <!-- threshold line at ~4m -->
+                <line x1="70" y1="156" x2="600" y2="156" stroke="#B0433D" stroke-width="1.3" stroke-dasharray="5,4"/>
+                <text x="576" y="150" fill="#B0433D" font-size="10" text-anchor="end">~4 m plateau</text>
+                <!-- vertical marker at N=3 -->
+                <line x1="223" y1="30" x2="223" y2="240" stroke="#5B7052" stroke-width="1.3" stroke-dasharray="5,4"/>
+                <!-- data: (N, error in m): 1:9.09 2:5.14 3:3.7 4:3.2 5:3.4 6:3.4 7:2.72 -->
+                <polyline points="146,54 223,133 300,163 377,176 453,164 530,164 600,148"
+                          fill="none" stroke="#3C4E36" stroke-width="2.2" stroke-linejoin="round"/>
+                <g fill="#3C4E36">
+                  <circle cx="146" cy="54" r="4"/>
+                  <circle cx="223" cy="133" r="4"/>
+                  <circle cx="300" cy="163" r="4"/>
+                  <circle cx="377" cy="176" r="4"/>
+                  <circle cx="453" cy="164" r="4"/>
+                  <circle cx="530" cy="164" r="4"/>
+                  <circle cx="600" cy="148" r="4"/>
+                </g>
+                <g fill="#1E2A22" font-size="11" text-anchor="middle">
+                  <text x="146" y="130">1</text>
+                  <text x="223" y="118">2</text>
+                  <text x="300" y="180">3</text>
+                  <text x="377" y="193">4</text>
+                  <text x="453" y="181">5</text>
+                  <text x="530" y="181">6</text>
+                  <text x="600" y="165">7</text>
+                </g>
+                <g fill="#6B6F63" font-size="11" text-anchor="middle">
+                  <text x="146" y="258">1</text>
+                  <text x="223" y="258">2</text>
+                  <text x="300" y="258">3</text>
+                  <text x="377" y="258">4</text>
+                  <text x="453" y="258">5</text>
+                  <text x="530" y="258">6</text>
+                  <text x="600" y="258">7</text>
+                </g>
+                <text x="335" y="278" fill="#6B6F63" font-size="11" text-anchor="middle">Number of BLE beacons worn simultaneously</text>
+                <text x="20" y="20" fill="#1E2A22" font-size="12" font-weight="600" font-family="Inter, sans-serif">Worst-case localization error vs. number of beacons</text>
+              </svg>
+              <p class="ra-figure-caption">Worst-case positioning error drops from 9.09&nbsp;m (single beacon) to 2.94&nbsp;m once three beacons are combined, then plateaus &mdash; additional beacons beyond three yield only marginal gains (values approximated from Figure 4 of Saghafi et al., 2025).</p>
+            </div>
           </div>
         </details>
       </div>
