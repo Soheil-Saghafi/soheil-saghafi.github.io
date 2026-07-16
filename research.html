@@ -361,6 +361,54 @@
 
         <details class="ra-project">
           <summary class="ra-project-summary">
+            <span class="ra-project-title">ECG-Image-Database: Paired ECG Images and Time-Series with Real-World Artifacts</span>
+            <span class="ra-project-chevron" aria-hidden="true"></span>
+          </summary>
+          <div class="ra-project-body">
+            <p>
+              In
+              <a href="https://doi.org/10.1088/1361-6579/ae85b2" target="_blank" rel="noopener">ECG-Image-Database: Large-Scale Paired ECG Images and Time-Series with Real-World Artifacts; A Foundation for Computerized ECG Digitization and Analysis</a>
+              (Reyna, Deepanshi, Weigle, Koscova, Campbell, Shivashankara, Saghafi, Nikookar, Motie-Shirazi,
+              Kiarashi, Seyedi, Hassannia, Bj&oslash;rnstad, Stenhede, Ranjbar, Clifford &amp; Sameni, <em>Physiological
+              Measurement</em>, 2026), we tackle a quieter but equally urgent problem in cardiology: countless
+              decades of ECGs exist only as paper printouts or scanned images, with no accompanying digital
+              waveform, and are steadily being lost to decay, fires, floods, or simple archive attrition before
+              anyone can mine them for research or diagnosis.
+            </p>
+            <p>
+              To give the field something to train and test digitization algorithms on, we built a large,
+              openly released dataset that pairs real digital ECG time series with images of what those same
+              ECGs look like after being printed and then degraded in realistic ways. Starting from 1,977 records
+              drawn from PTB-XL (Germany) and Emory Healthcare (USA), we used our open-source ECG-Image-Kit to
+              generate synthetic printouts, then subjected physical copies to soaking, coffee and sauce stains,
+              creases, mold growth, and re-photography or re-scanning under varied lighting and devices &mdash;
+              alongside purely digital distortions like rotations, perspective warps, and handwritten annotations.
+              We also added a fully real-world clinical arm: 266 thermal-paper ECGs collected during routine care
+              at Akershus University Hospital in Norway, each photographed and scanned multiple ways under
+              ordinary clinical handling (creasing, faint annotations, natural wear).
+            </p>
+            <p>
+              The result is 37,191 images spanning 2,243 unique ECG records across three countries, each image
+              still linked back to its original ground-truth waveform &mdash; from clean electronic printouts to
+              severely water-damaged, moldy, or badly-lit phone photos. This resource has already served as the
+              training and test data for the PhysioNet Challenge 2024 on ECG digitization and a follow-up
+              2025&ndash;2026 Kaggle challenge; top-performing algorithms from those challenges reconstructed
+              waveforms at over 22 dB SNR, with clinically important measurements (PR interval, QT interval, QRS
+              duration, heart rate, ST-segment) statistically indistinguishable from the original signals under
+              moderate degradation. In short, this gives the community a shared, realistic benchmark for turning
+              the world's paper ECG archives back into usable digital data before that history disappears for
+              good.
+            </p>
+
+            <div class="ra-figure">
+              <img src="ecg-image-db-fig3.png" alt="Flowchart showing how ECG time series are converted to images and then subjected to programmatic and physical degradation variants" style="width:100%;max-width:720px;display:block;margin:0 auto;border-radius:4px;">
+              <p class="ra-figure-caption">The dataset-creation pipeline: each ECG time series is rendered into a printout-style image (with optional programmatic distortions like creases or handwriting), then physically printed and pushed through real-world degradation paths &mdash; scanning, phone photos, staining, and mold &mdash; producing many linked image variants of the same underlying signal.</p>
+            </div>
+          </div>
+        </details>
+
+        <details class="ra-project">
+          <summary class="ra-project-summary">
             <span class="ra-project-title">Graph Trilateration for Indoor Localization with Sparse BLE Receivers</span>
             <span class="ra-project-chevron" aria-hidden="true"></span>
           </summary>
